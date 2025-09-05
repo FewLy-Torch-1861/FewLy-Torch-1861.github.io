@@ -21,11 +21,31 @@ const searchInput = document.getElementById("search-input");
 if (searchForm && searchInput) {
   searchForm.addEventListener("submit", function (event) {
     event.preventDefault(); // Prevent the form from submitting the traditional way
-    const query = searchInput.value;
-    if (query) {
-      window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
-        query
-      )}`;
+    const rawQuery = searchInput.value.trim();
+    if (!rawQuery) {
+      return;
     }
+
+    const searchEngines = {
+      "!yt": "https://www.youtube.com/results?search_query=",
+      "!so": "https://stackoverflow.com/search?q=",
+      "!aw": "https://wiki.archlinux.org/index.php?search=",
+      "!ddg": "https://duckduckgo.com/?q=",
+      "!wiki": "https://en.wikipedia.org/w/index.php?search=",
+    };
+    const defaultSearchEngine = "https://www.google.com/search?q=";
+
+    const parts = rawQuery.split(" ");
+    const prefix = parts[0];
+
+    let searchUrl = defaultSearchEngine;
+    let query = rawQuery;
+
+    if (searchEngines[prefix]) {
+      searchUrl = searchEngines[prefix];
+      query = parts.slice(1).join(" ");
+    }
+
+    window.location.href = `${searchUrl}${encodeURIComponent(query)}`;
   });
 }
