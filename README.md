@@ -22,6 +22,13 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 - **Reset to Default**: Easily revert all changes back to the original settings with a single click.
 - **Responsive Design**: Adapts to different screen sizes for a great experience on any device.
 
+## To-Do
+
+- [ ] Clock format customization (e.g., 12h/24h, show/hide seconds)
+- [ ] Customizable positions for the clock and search bar
+- [ ] Search suggestions
+- [ ] Bookmarks/quick links section
+
 ## Usage
 
 To use this as your start page, simply set `https://fewly-torch-1861.github.io/` as your browser's home page or new tab page.
