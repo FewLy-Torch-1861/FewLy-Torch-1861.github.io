@@ -12,6 +12,9 @@
   --overlay2-color: var(--ctp-latte-overlay2);
   --accent-color: var(--ctp-latte-mauve);
   --clock-color: var(--ctp-latte-pink);
+  --clock-font-size: 2.5rem;
+  --search-font-size: 1rem;
+  --search-width: 50vw;
 }
 
 body.dark-mode {
@@ -43,13 +46,13 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 50vw;
+  width: var(--search-width);
   text-align: center;
 }
 
 #clock {
   color: var(--clock-color);
-  font-size: 2.5rem;
+  font-size: var(--clock-font-size);
   font-weight: bold;
   text-align: center;
   margin-bottom: 1rem;
@@ -66,7 +69,7 @@ body {
   border-radius: 25px;
   background-color: var(--surface-color);
   color: var(--text-color);
-  font-size: 1rem;
+  font-size: var(--search-font-size);
   outline: none;
   transition: border-color 0.3s ease, background-color 0.3s ease,
     color 0.3s ease;
@@ -181,6 +184,11 @@ body {
   color: var(--bg-color);
 }
 
+.settings-button.danger:hover {
+  background-color: var(--ctp-mocha-red); /* A distinct danger color */
+  color: var(--ctp-mocha-base);
+}
+
 .color-swatches {
   display: flex;
   flex-wrap: wrap;
@@ -200,4 +208,19 @@ body {
 .color-swatch:hover {
   transform: scale(1.1);
   border-color: var(--accent-color);
+}
+
+.appearance-setting {
+  margin-bottom: 1rem;
+}
+
+.appearance-setting label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.appearance-setting input[type="range"] {
+  width: 100%;
+  cursor: pointer;
 }

@@ -62,7 +62,7 @@ function initializeTheme() {
 }
 
 // --- Settings ---
-let config = {
+const defaultConfig = {
   searchEngines: {
     "!yt": "https://www.youtube.com/results?search_query=",
     "!so": "https://stackoverflow.com/search?q=",
@@ -79,16 +79,29 @@ let config = {
     accent: null,
     clock: null,
   },
+  styles: {
+    clockFontSize: "2.5", // rem
+    searchFontSize: "1", // rem
+    searchWidth: "50", // vw
+  },
 };
+
+let config = JSON.parse(JSON.stringify(defaultConfig)); // Start with a deep copy of defaults
 
 function loadConfig() {
   const storedConfig = localStorage.getItem("config");
   if (storedConfig) {
-    config = { ...config, ...JSON.parse(storedConfig) };
+    const loadedConfig = JSON.parse(storedConfig);
+    // Deep merge for nested objects to preserve defaults for new keys
+    config = {
+      ...config,
+      ...loadedConfig, // User's settings override defaults
+      colors: { ...config.colors, ...(loadedConfig.colors || {}) }, // Merge colors
+      styles: { ...config.styles, ...(loadedConfig.styles || {}) }, // Merge styles
+    };
   }
   // Ensure nested objects exist
   config.searchEngines = config.searchEngines || {};
-  config.colors = config.colors || { accent: null, clock: null };
 }
 
 function saveConfig() {
@@ -108,6 +121,27 @@ function applyCustomColors() {
   if (config.colors.clock) {
     const clockColorVar = `var(--ctp-${themePrefix}-${config.colors.clock})`;
     document.documentElement.style.setProperty("--clock-color", clockColorVar);
+  }
+}
+
+function applyCustomStyles() {
+  if (config.styles.clockFontSize) {
+    document.documentElement.style.setProperty(
+      "--clock-font-size",
+      `${config.styles.clockFontSize}rem`
+    );
+  }
+  if (config.styles.searchFontSize) {
+    document.documentElement.style.setProperty(
+      "--search-font-size",
+      `${config.styles.searchFontSize}rem`
+    );
+  }
+  if (config.styles.searchWidth) {
+    document.documentElement.style.setProperty(
+      "--search-width",
+      `${config.styles.searchWidth}vw`
+    );
   }
 }
 
@@ -198,6 +232,7 @@ function setupSettingsModal() {
     populateSearchEngineSettings();
     settingsModal.style.display = "block";
   });
+  setupAppearanceSettings(); // Populate sliders immediately
 
   settingsClose.addEventListener("click", () => {
     saveSearchEngineSettings();
@@ -212,6 +247,20 @@ function setupSettingsModal() {
   });
 
   addEngineButton.addEventListener("click", () => addSearchEngineInput());
+
+  const resetSettingsButton = document.getElementById("reset-settings-button");
+  if (resetSettingsButton) {
+    resetSettingsButton.addEventListener("click", () => {
+      if (
+        confirm(
+          "Are you sure you want to reset all settings to default? This cannot be undone."
+        )
+      ) {
+        localStorage.removeItem("config");
+        window.location.reload();
+      }
+    });
+  }
 }
 
 function setupColorSettings() {
@@ -273,11 +322,61 @@ function setupColorSettings() {
   colorSettingsContainer.appendChild(createColorPicker("Clock Color", "clock"));
 }
 
+function setupAppearanceSettings() {
+  const container = document.getElementById("appearance-settings-container");
+  if (!container) return;
+
+  container.innerHTML = ""; // Clear existing
+
+  const createSlider = (label, property, min, max, step, unit) => {
+    const settingDiv = document.createElement("div");
+    settingDiv.className = "appearance-setting";
+
+    const labelEl = document.createElement("label");
+    const valueSpan = document.createElement("span");
+    labelEl.textContent = `${label}: `;
+    labelEl.appendChild(valueSpan);
+
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = min;
+    slider.max = max;
+    slider.step = step;
+    slider.value = config.styles[property];
+
+    const updateValue = (value) => {
+      valueSpan.textContent = `${value}${unit}`;
+    };
+
+    slider.addEventListener("input", (event) => {
+      const newValue = event.target.value;
+      config.styles[property] = newValue;
+      updateValue(newValue);
+      applyCustomStyles(); // Apply live
+    });
+
+    slider.addEventListener("change", () => {
+      saveConfig(); // Save only when user releases the slider
+    });
+
+    settingDiv.appendChild(labelEl);
+    settingDiv.appendChild(slider);
+    container.appendChild(settingDiv);
+
+    updateValue(slider.value); // Set initial value text
+  };
+
+  createSlider("Clock Font Size", "clockFontSize", 1, 8, 0.1, "rem");
+  createSlider("Search Font Size", "searchFontSize", 0.5, 2, 0.05, "rem");
+  createSlider("Search Bar Width", "searchWidth", 20, 100, 1, "vw");
+}
+
 // --- Initialization ---
 document.addEventListener("DOMContentLoaded", () => {
   loadConfig();
   initializeTheme();
   applyCustomColors();
+  applyCustomStyles();
   setupSettingsModal();
   setupColorSettings();
 });
