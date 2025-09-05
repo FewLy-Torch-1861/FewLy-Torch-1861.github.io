@@ -32,6 +32,10 @@ if (searchForm && searchInput) {
       "!aw": "https://wiki.archlinux.org/index.php?search=",
       "!ddg": "https://duckduckgo.com/?q=",
       "!wiki": "https://en.wikipedia.org/w/index.php?search=",
+      "!g": "https://www.google.com/search?q=",
+      "!gh": "https://github.com/search?q=",
+      "!tw": "https://twitter.com/search?q=",
+      "!": "https://",
     };
     const defaultSearchEngine = "https://www.google.com/search?q=";
 
@@ -44,6 +48,16 @@ if (searchForm && searchInput) {
     if (searchEngines[prefix]) {
       searchUrl = searchEngines[prefix];
       query = parts.slice(1).join(" ");
+    }
+
+    // Special handling for '!' to allow for http:// and https://
+    if (prefix === "!") {
+      if (query.startsWith("http://") || query.startsWith("https://")) {
+        window.location.href = query;
+      } else {
+        window.location.href = `https://${query}`;
+      }
+      return;
     }
 
     window.location.href = `${searchUrl}${encodeURIComponent(query)}`;
