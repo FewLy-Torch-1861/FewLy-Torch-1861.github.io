@@ -23,6 +23,9 @@ const ConfigManager = (function () {
       clockFormat: "it's {HH}:{mm}:{ss} now!",
       edgePaddingV: "5", // %
       edgePaddingH: "5", // %
+      showCredit: true,
+      showSettingsButton: true,
+      showThemeButton: true,
     },
     positions: {
       clock: { v: "center", h: "center" },

@@ -101,6 +101,17 @@ function applyCustomStyles() {
       `${config.styles.searchWidth}vw`
     );
   }
+
+  const setElementVisibility = (id, isVisible) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.style.display = isVisible ? "" : "none";
+    }
+  };
+
+  setElementVisibility("credit-text", config.styles.showCredit);
+  setElementVisibility("settings-toggle", config.styles.showSettingsButton);
+  setElementVisibility("theme-toggle", config.styles.showThemeButton);
   applyCustomPositions();
 }
 
@@ -262,10 +273,21 @@ function setupSettingsModal() {
   if (!settingsModal || !settingsToggle || !settingsClose) return;
 
   settingsToggle.addEventListener("click", () => {
-    populateSearchEngineSettings();
     settingsModal.style.display = "block";
+    populateSearchEngineSettings();
   });
-  setupAppearanceSettings(); // Populate sliders immediately
+  setupAppearanceSettings(); // Populate settings immediately
+  setupLayoutSettings();
+
+  const openSettings = () => {
+    if (settingsModal.style.display === "block") {
+      settingsModal.style.display = "none";
+      saveSearchEngineSettings();
+    } else {
+      settingsModal.style.display = "block";
+      populateSearchEngineSettings();
+    }
+  };
 
   settingsClose.addEventListener("click", () => {
     saveSearchEngineSettings();
@@ -294,6 +316,20 @@ function setupSettingsModal() {
       }
     });
   }
+
+  // Add keybinds
+  window.addEventListener("keydown", (event) => {
+    if (event.ctrlKey) {
+      if (event.key === ",") {
+        event.preventDefault();
+        openSettings();
+      } else if (event.key === ".") {
+        event.preventDefault();
+        const newTheme = document.documentElement.classList.contains("dark-mode") ? "light-mode" : "dark-mode";
+        applyTheme(newTheme);
+      }
+    }
+  });
 }
 
 function setupColorSettings() {
@@ -355,6 +391,16 @@ function setupColorSettings() {
   colorSettingsContainer.appendChild(createColorPicker("Clock Color", "clock"));
 }
 
+function createSettingsGroup(container, title) {
+  const fieldset = document.createElement("fieldset");
+  fieldset.className = "settings-group";
+  const legend = document.createElement("legend");
+  legend.textContent = title;
+  fieldset.appendChild(legend);
+  container.appendChild(fieldset);
+  return fieldset;
+}
+
 function setupAppearanceSettings() {
   const container = document.getElementById("appearance-settings-container");
   if (!container) return;
@@ -385,7 +431,7 @@ function setupAppearanceSettings() {
 
     settingDiv.appendChild(labelEl);
     settingDiv.appendChild(input);
-    container.appendChild(settingDiv);
+    return settingDiv;
   };
 
   const createSlider = (label, property, min, max, step, unit) => {
@@ -421,11 +467,11 @@ function setupAppearanceSettings() {
 
     settingDiv.appendChild(labelEl);
     settingDiv.appendChild(slider);
-    container.appendChild(settingDiv);
 
     updateValue(slider.value); // Set initial value text
+    return settingDiv;
   };
-
+  
   const createSelect = (label, element, axis) => {
     const settingDiv = document.createElement("div");
     settingDiv.className = "appearance-setting";
@@ -455,21 +501,98 @@ function setupAppearanceSettings() {
 
     settingDiv.appendChild(labelEl);
     settingDiv.appendChild(select);
-    container.appendChild(settingDiv);
+    return settingDiv;
   };
 
-  createTextInput("Clock Format", "clockFormat", "e.g. {HH}:{mm}");
-  createSlider("Clock Font Size", "clockFontSize", 1, 8, 0.1, "rem");
-  createSelect("Clock Vertical Position", "clock", "v");
-  createSelect("Clock Horizontal Position", "clock", "h");
+  const createCheckbox = (label, property) => {
+    const settingDiv = document.createElement("div");
+    settingDiv.className = "appearance-setting";
 
-  createSlider("Search Font Size", "searchFontSize", 0.5, 2, 0.05, "rem");
-  createSlider("Search Bar Width", "searchWidth", 20, 100, 1, "vw");
-  createSelect("Search Vertical Position", "search", "v");
-  createSelect("Search Horizontal Position", "search", "h");
+    const labelEl = document.createElement("label");
+    labelEl.style.display = "flex";
+    labelEl.style.alignItems = "center";
+    labelEl.style.gap = "10px";
 
-  createSlider("Vertical Edge Padding", "edgePaddingV", 0, 45, 1, "%");
-  createSlider("Horizontal Edge Padding", "edgePaddingH", 0, 45, 1, "%");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "appearance-checkbox";
+    checkbox.checked = ConfigManager.get().styles[property];
+
+    checkbox.addEventListener("change", (event) => {
+      ConfigManager.get().styles[property] = event.target.checked;
+      ConfigManager.save();
+      applyCustomStyles(); // Re-apply styles to show/hide credit
+    });
+
+    const textSpan = document.createElement("span");
+    textSpan.textContent = label;
+
+    labelEl.appendChild(checkbox);
+    labelEl.appendChild(textSpan);
+    settingDiv.appendChild(labelEl);
+    return settingDiv;
+  };
+
+  // --- Create Groups ---
+  const clockGroup = createSettingsGroup(container, "Clock");
+  clockGroup.appendChild(createTextInput("Format", "clockFormat", "e.g. {HH}:{mm}"));
+  clockGroup.appendChild(createSlider("Font Size", "clockFontSize", 1, 8, 0.1, "rem"));
+
+  const searchGroup = createSettingsGroup(container, "Search Bar");
+  searchGroup.appendChild(createSlider("Font Size", "searchFontSize", 0.5, 2, 0.05, "rem"));
+  searchGroup.appendChild(createSlider("Width", "searchWidth", 20, 100, 1, "vw"));
+
+  const generalGroup = createSettingsGroup(container, "Footer");
+  generalGroup.appendChild(createCheckbox("Show 'made by me' Credit", "showCredit"));
+  generalGroup.appendChild(createCheckbox("Show Settings Button (Ctrl+,)", "showSettingsButton"));
+  generalGroup.appendChild(createCheckbox("Show Theme Toggle Button (Ctrl+.)", "showThemeButton"));
+}
+
+function setupLayoutSettings() {
+  const container = document.getElementById("layout-settings-container");
+  if (!container) return;
+
+  container.innerHTML = ""; // Clear existing
+
+  // Re-use creator functions by defining them locally or passing them.
+  // For simplicity, we'll define them again here.
+  const createSelect = (label, element, axis) => {
+    const settingDiv = document.createElement("div");
+    settingDiv.className = "appearance-setting";
+    const labelEl = document.createElement("label");
+    labelEl.textContent = label;
+    const select = document.createElement("select");
+    const options = axis === "v" ? ["top", "center", "bottom"] : ["left", "center", "right"];
+    options.forEach((opt) => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+      select.appendChild(option);
+    });
+    select.value = ConfigManager.get().positions[element]?.[axis] || (axis === "v" ? "center" : "center");
+    select.addEventListener("change", (event) => {
+      ConfigManager.get().positions[element][axis] = event.target.value;
+      applyCustomPositions();
+      ConfigManager.save();
+    });
+    settingDiv.appendChild(labelEl);
+    settingDiv.appendChild(select);
+    return settingDiv;
+  };
+  // This is a copy of the createSlider function from setupAppearanceSettings
+  const createSlider = (label, property, min, max, step, unit) => { const settingDiv = document.createElement("div"); settingDiv.className = "appearance-setting"; const labelEl = document.createElement("label"); const valueSpan = document.createElement("span"); labelEl.textContent = `${label}: `; labelEl.appendChild(valueSpan); const slider = document.createElement("input"); slider.type = "range"; slider.min = min; slider.max = max; slider.step = step; slider.value = ConfigManager.get().styles[property]; const updateValue = (value) => { valueSpan.textContent = `${value}${unit}`; }; slider.addEventListener("input", (event) => { const newValue = event.target.value; ConfigManager.get().styles[property] = newValue; updateValue(newValue); applyCustomStyles(); }); slider.addEventListener("change", () => { ConfigManager.save(); }); settingDiv.appendChild(labelEl); settingDiv.appendChild(slider); updateValue(slider.value); return settingDiv; };
+
+  const clockGroup = createSettingsGroup(container, "Clock Position");
+  clockGroup.appendChild(createSelect("Vertical", "clock", "v"));
+  clockGroup.appendChild(createSelect("Horizontal", "clock", "h"));
+
+  const searchGroup = createSettingsGroup(container, "Search Bar Position");
+  searchGroup.appendChild(createSelect("Vertical", "search", "v"));
+  searchGroup.appendChild(createSelect("Horizontal", "search", "h"));
+
+  const paddingGroup = createSettingsGroup(container, "Page Padding");
+  paddingGroup.appendChild(createSlider("Vertical Edge", "edgePaddingV", 0, 45, 1, "%"));
+  paddingGroup.appendChild(createSlider("Horizontal Edge", "edgePaddingH", 0, 45, 1, "%"));
 }
 
 // --- Initialization ---
@@ -479,6 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyCustomColors();
   applyCustomStyles();
   setupSettingsModal();
+  // setupAppearanceSettings and setupLayoutSettings are called from within setupSettingsModal
   setupColorSettings();
 
   // Pre-render clock to avoid delay

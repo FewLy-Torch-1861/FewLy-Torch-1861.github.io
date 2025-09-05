@@ -42,7 +42,7 @@
     <div class="footer">
       <button id="settings-toggle">⚙️</button>
       <button id="theme-toggle"></button>
-      made by me.
+      <span id="credit-text">made by me.</span>
     </div>
 
     <div id="settings-modal" class="modal" style="display: none">
@@ -71,11 +71,18 @@
         <div class="settings-section">
           <h3>Appearance</h3>
           <p class="settings-description">
-            Use <code>{HH}</code> for hours, <code>{mm}</code> for minutes, and
-            <code>{ss}</code> for seconds in the clock format.
-            You can also change the position of the clock and search bar.
+            Customize the look of the clock, search bar, and other elements.
+            Use <code>{HH}</code>, <code>{mm}</code>, <code>{ss}</code> in the clock format.
           </p>
           <div id="appearance-settings-container"></div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Layout</h3>
+          <p class="settings-description">
+            Adjust the position of elements on the page.
+          </p>
+          <div id="layout-settings-container"></div>
         </div>
 
         <div class="settings-section">

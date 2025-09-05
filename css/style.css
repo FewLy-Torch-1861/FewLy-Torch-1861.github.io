@@ -57,6 +57,7 @@ body {
   font-size: var(--clock-font-size);
   font-weight: bold;
   text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   margin-bottom: 1rem;
   width: 100%;
 }
@@ -78,11 +79,13 @@ body {
   font-size: var(--search-font-size);
   outline: none;
   transition: border-color 0.3s ease, background-color 0.3s ease,
-    color 0.3s ease;
+    color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 #search-input:focus {
   border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 #settings-toggle,
@@ -123,8 +126,8 @@ body {
   border-radius: 10px;
   width: 80%;
   max-width: 600px;
-  position: relative;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative; /* Changed from box-shadow to filter for a more modern look */
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
 }
 
 .close-button {
@@ -155,6 +158,20 @@ body {
   font-size: 0.9rem;
   color: var(--overlay2-color);
   margin-bottom: 1rem;
+}
+
+.settings-group {
+  border: 1px solid var(--surface-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-group legend {
+  padding: 0 0.5rem;
+  color: var(--text-color);
+  font-weight: bold;
+  margin-left: 0.5rem; /* Align with content padding */
 }
 
 .search-engine-entry {
@@ -238,9 +255,45 @@ body {
   border-radius: 5px;
   padding: 8px;
 }
-.appearance-setting input[type="range"] {
-  width: 100%;
+
+/* --- Custom Checkbox Styles --- */
+.appearance-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--surface-color);
+  margin: 0;
+  font: inherit;
+  color: currentColor;
+  width: 1.15em;
+  height: 1.15em;
+  border: 1px solid var(--overlay-color);
+  border-radius: 0.25em;
+  transform: translateY(-0.075em);
+  display: grid;
+  place-content: center;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.appearance-checkbox::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em var(--accent-color);
+  background-color: CanvasText; /* For Windows High Contrast mode */
+  transform-origin: bottom left;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.appearance-checkbox:checked::before {
+  transform: scale(1);
+}
+
+.appearance-checkbox:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 .appearance-setting input[type="range"] {
