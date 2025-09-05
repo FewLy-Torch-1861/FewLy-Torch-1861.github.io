@@ -9,7 +9,7 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 
 ## Features
 
-> [! Note]
+> [!Note]
 > This project currently unoptimized for mobile.
 > I not recommend using it on mobile.
 
