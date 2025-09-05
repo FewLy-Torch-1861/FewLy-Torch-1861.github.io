@@ -7,9 +7,17 @@ body {
 
 #clock {
   color: var(--ctp-mocha-text);
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: bold;
   text-align: right;
-  padding-top: 5vh;
-  padding-right: 5vw;
+  /* padding-top: 5vh;
+  padding-bottom: 5vh;
+  padding-left: 5vw;
+  padding-right: 5vw;   */
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
 }
