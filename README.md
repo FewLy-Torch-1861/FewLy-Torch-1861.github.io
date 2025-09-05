@@ -23,21 +23,4 @@ Set `https://fewly-torch-1861.github.io/` as your new tab or home page in your b
 ## Customization
 
 > [!NOTE]  
-> For now, you'll need to fork this repository to apply your own customizations. A settings page is planned for a future update to make this process easier!
-
-### Search Engines
-
-You can customize the search engines and their prefixes in `js/main.js`. Look for the `searchEngines` object:
-
-```javascript
-    const searchEngines = {
-      "!yt": "https://www.youtube.com/results?search_query=",
-      "!so": "https://stackoverflow.com/search?q=",
-      "!aw": "https://wiki.archlinux.org/index.php?search=",
-      "!ddg": "https://duckduckgo.com/?q=",
-      "!wiki": "https://en.wikipedia.org/w/index.php?search=",
-      "!g": "https://www.google.com/search?q=",
-      "!gh": "https://github.com/search?q=",
-      "!tw": "https://twitter.com/search?q=",
-      "!": "https://", // Special prefix for direct URL navigation
-    };
+> For now, color settings are broken
