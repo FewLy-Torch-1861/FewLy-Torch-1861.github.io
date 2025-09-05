@@ -1,14 +1,15 @@
+@import url('https://cdn.jsdelivr.net/npm/@catppuccin/palette/css/catppuccin.css');
+
 body {
   font-family: 'JetBrains Mono', Rubik, sans-serif;
-  background: black;
-  color: white;
+  background: var(--ctp-mocha-base);
 }
 
 #clock {
+  color: var(--ctp-mocha-text);
   font-size: 3rem;
   font-weight: bold;
   text-align: right;
   padding-top: 5vh;
   padding-right: 5vw;
-;
 }
