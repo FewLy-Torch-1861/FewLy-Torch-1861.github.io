@@ -1,7 +1,10 @@
-@import url('https://cdn.jsdelivr.net/npm/@catppuccin/palette/css/catppuccin.css');
+@import url("https://cdn.jsdelivr.net/npm/@catppuccin/palette/css/catppuccin.css");
+
+* {
+  font-family: "JetBrains Mono", Rubik, sans-serif;
+}
 
 body {
-  font-family: 'JetBrains Mono', Rubik, sans-serif;
   background: var(--ctp-mocha-base);
 }
 
@@ -13,19 +16,40 @@ body {
   color: var(--ctp-mocha-overlay0);
 }
 
-
-#clock {
-  color: var(--ctp-mocha-text);
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-align: right;
-  /* padding-top: 5vh;
-  padding-bottom: 5vh;
-  padding-left: 5vw;
-  padding-right: 5vw;   */
+#center-container {
   margin: 0;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 50vw;
+  text-align: center;
+}
+
+#clock {
+  color: var(--ctp-mocha-text);
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+#search-form {
+  display: block;
+}
+
+#search-input {
+  width: 90%;
+  padding: 10px 15px;
+  border: 2px solid var(--ctp-mocha-overlay0);
+  border-radius: 25px;
+  background-color: var(--ctp-mocha-surface0);
+  color: var(--ctp-mocha-text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+#search-input:focus {
+  border-color: var(--ctp-mocha-mauve);
 }

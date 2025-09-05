@@ -1,24 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New Tab</title>
+    <link href="css/style.css" rel="stylesheet" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Noto+Sans+Thai:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+    </style>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>New Tab</title>
-  <link href="css/style.css" rel="stylesheet" />
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Noto+Sans+Thai:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
-  </style>
-</head>
+  <body>
+    <div id="center-container">
+      <div id="clock"></div>
+      <form id="search-form">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search..."
+          autofocus
+          autocomplete="off"
+        />
+      </form>
+    </div>
 
-<body>
-  <div id="clock"></div>
+    <script src="js/main.js"></script>
 
-  <script src="js/main.js"></script>
-
-  <div class="footer">
-    made by me.
-  </div>
-</body>
-
+    <div class="footer">made by me.</div>
+  </body>
 </html>
