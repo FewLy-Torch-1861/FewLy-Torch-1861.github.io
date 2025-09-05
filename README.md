@@ -28,6 +28,7 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 - [ ] Customizable positions for the clock and search bar
 - [ ] Search suggestions
 - [ ] Bookmarks/quick links section
+- [ ] show/hide credit
 
 ## Usage
 
