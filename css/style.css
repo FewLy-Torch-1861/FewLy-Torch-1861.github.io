@@ -224,3 +224,13 @@ body {
   width: 100%;
   cursor: pointer;
 }
+
+.appearance-input {
+  width: 100%;
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  border: 1px solid var(--overlay-color);
+  border-radius: 5px;
+  padding: 8px;
+  font-family: "JetBrains Mono", monospace;
+}

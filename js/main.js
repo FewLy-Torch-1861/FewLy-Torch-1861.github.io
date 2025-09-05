@@ -8,13 +8,13 @@ function updateClock() {
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const seconds = String(now.getSeconds()).padStart(2, "0");
-    clockElement.textContent = `it's ${hours}:${minutes}:${seconds} now!`;
+    const format = config.styles.clockFormat || "it's {HH}:{mm}:{ss} now!";
+    const formattedTime = format
+      .replace("{HH}", hours)
+      .replace("{mm}", minutes)
+      .replace("{ss}", seconds);
+    clockElement.textContent = formattedTime;
   }
-}
-
-if (clockElement) {
-  setInterval(updateClock, 1000);
-  updateClock();
 }
 
 // --- Theme ---
@@ -83,6 +83,7 @@ const defaultConfig = {
     clockFontSize: "2.5", // rem
     searchFontSize: "1", // rem
     searchWidth: "50", // vw
+    clockFormat: "it's {HH}:{mm}:{ss} now!",
   },
 };
 
@@ -328,6 +329,33 @@ function setupAppearanceSettings() {
 
   container.innerHTML = ""; // Clear existing
 
+  const createTextInput = (label, property, placeholder, description) => {
+    const settingDiv = document.createElement("div");
+    settingDiv.className = "appearance-setting";
+
+    const labelEl = document.createElement("label");
+    labelEl.textContent = label;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "appearance-input";
+    input.value = config.styles[property];
+    input.placeholder = placeholder;
+
+    input.addEventListener("input", (event) => {
+      config.styles[property] = event.target.value;
+      updateClock(); // Update clock live as user types
+    });
+
+    input.addEventListener("change", () => {
+      saveConfig();
+    });
+
+    settingDiv.appendChild(labelEl);
+    settingDiv.appendChild(input);
+    container.appendChild(settingDiv);
+  };
+
   const createSlider = (label, property, min, max, step, unit) => {
     const settingDiv = document.createElement("div");
     settingDiv.className = "appearance-setting";
@@ -366,6 +394,7 @@ function setupAppearanceSettings() {
     updateValue(slider.value); // Set initial value text
   };
 
+  createTextInput("Clock Format", "clockFormat", "e.g. {HH}:{mm}");
   createSlider("Clock Font Size", "clockFontSize", 1, 8, 0.1, "rem");
   createSlider("Search Font Size", "searchFontSize", 0.5, 2, 0.05, "rem");
   createSlider("Search Bar Width", "searchWidth", 20, 100, 1, "vw");
@@ -380,3 +409,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSettingsModal();
   setupColorSettings();
 });
+
+// Start the clock after the DOM is loaded and config is ready
+if (document.getElementById("clock")) {
+  updateClock(); // Initial call to display clock immediately
+  setInterval(updateClock, 1000);
+}
