@@ -5,9 +5,18 @@ body {
   background: var(--ctp-mocha-base);
 }
 
+.footer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding-right: 10px;
+  color: var(--ctp-mocha-overlay0);
+}
+
+
 #clock {
   color: var(--ctp-mocha-text);
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
   text-align: right;
   /* padding-top: 5vh;
@@ -19,5 +28,4 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-
 }
