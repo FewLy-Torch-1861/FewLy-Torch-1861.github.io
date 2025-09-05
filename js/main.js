@@ -273,33 +273,30 @@ function setupSettingsModal() {
   if (!settingsModal || !settingsToggle || !settingsClose) return;
 
   settingsToggle.addEventListener("click", () => {
-    settingsModal.style.display = "block";
+    settingsModal.classList.add("show");
+    settingsModal.querySelector(".modal-content").style.transform = "scale(1)";
     populateSearchEngineSettings();
   });
   setupAppearanceSettings(); // Populate settings immediately
   setupLayoutSettings();
 
   const openSettings = () => {
-    if (settingsModal.style.display === "block") {
-      settingsModal.style.display = "none";
+    if (settingsModal.classList.contains("show")) {
+      settingsModal.classList.remove("show");
+      settingsModal.querySelector(".modal-content").style.transform = "scale(0.95)";
       saveSearchEngineSettings();
     } else {
-      settingsModal.style.display = "block";
+      settingsModal.classList.add("show");
+      settingsModal.querySelector(".modal-content").style.transform = "scale(1)";
       populateSearchEngineSettings();
     }
   };
 
-  settingsClose.addEventListener("click", () => {
-    saveSearchEngineSettings();
-    settingsModal.style.display = "none";
-  });
+  const closeSettings = () => { saveSearchEngineSettings(); settingsModal.classList.remove("show"); settingsModal.querySelector(".modal-content").style.transform = "scale(0.95)"; };
 
-  window.addEventListener("click", (event) => {
-    if (event.target === settingsModal) {
-      saveSearchEngineSettings();
-      settingsModal.style.display = "none";
-    }
-  });
+  settingsClose.addEventListener("click", closeSettings);
+
+  settingsModal.addEventListener("click", (event) => { if (event.target === settingsModal) { closeSettings(); } });
 
   addEngineButton.addEventListener("click", () => addSearchEngineInput());
 
@@ -417,8 +414,21 @@ function setupColorSettings() {
       swatch.style.backgroundColor = colorVar;
       swatch.dataset.colorName = color;
 
+      // Highlight the selected color on creation
+      if (ConfigManager.get().colors[property] === color) {
+        swatch.classList.add("selected");
+      }
+
       swatch.addEventListener("click", (event) => {
         const clickedSwatch = event.currentTarget;
+        // Remove 'selected' from any previously selected swatch in this group
+        const parentSwatches = clickedSwatch.parentElement;
+        const oldSelected = parentSwatches.querySelector(".selected");
+        if (oldSelected) {
+          oldSelected.classList.remove("selected");
+        }
+        // Add 'selected' to the newly clicked swatch
+        clickedSwatch.classList.add("selected");
         // Store the color name (e.g., 'red') instead of the full CSS variable
         ConfigManager.get().colors[property] = clickedSwatch.dataset.colorName;
         ConfigManager.save();
