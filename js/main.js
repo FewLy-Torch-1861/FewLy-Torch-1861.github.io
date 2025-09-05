@@ -303,6 +303,51 @@ function setupSettingsModal() {
 
   addEngineButton.addEventListener("click", () => addSearchEngineInput());
 
+  // --- Import/Export ---
+  const exportButton = document.getElementById("export-settings-button");
+  if (exportButton) {
+    exportButton.addEventListener("click", () => {
+      const config = ConfigManager.get();
+      const configJson = JSON.stringify(config, null, 2); // Pretty-print JSON
+      const blob = new Blob([configJson], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "config.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  const importButton = document.getElementById("import-settings-button");
+  if (importButton) {
+    importButton.addEventListener("click", () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json,application/json";
+      input.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const importedConfig = JSON.parse(e.target.result);
+            // Simple validation: check if a known key exists
+            if (importedConfig && importedConfig.styles) {
+              localStorage.setItem("config", JSON.stringify(importedConfig));
+              alert("Configuration imported successfully! The page will now reload.");
+              window.location.reload();
+            } else { throw new Error("Invalid config file format."); }
+          } catch (error) { alert(`Error importing configuration: ${error.message}`); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    });
+  }
+
   const resetSettingsButton = document.getElementById("reset-settings-button");
   if (resetSettingsButton) {
     resetSettingsButton.addEventListener("click", () => {
