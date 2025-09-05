@@ -24,7 +24,7 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 
 ## To-Do
 
-- [ ] Clock format customization (e.g., 12h/24h, show/hide seconds)
+- [x] Clock format customization (e.g., 12h/24h, show/hide seconds)
 - [ ] Customizable positions for the clock and search bar
 - [ ] Search suggestions
 - [ ] Bookmarks/quick links section
