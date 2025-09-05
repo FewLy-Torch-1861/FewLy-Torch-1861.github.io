@@ -17,7 +17,7 @@
   --search-width: 50vw;
 }
 
-body.dark-mode {
+:root.dark-mode {
   --bg-color: var(--ctp-mocha-base);
   --text-color: var(--ctp-mocha-text);
   --surface-color: var(--ctp-mocha-surface0);
@@ -40,6 +40,7 @@ body {
   align-items: center;
 }
 
+/* This container is dynamically added by JS when clock and search are both centered */
 #center-container {
   margin: 0;
   position: absolute;
@@ -51,15 +52,20 @@ body {
 }
 
 #clock {
+  position: absolute;
   color: var(--clock-color);
   font-size: var(--clock-font-size);
   font-weight: bold;
   text-align: center;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 #search-form {
+  position: absolute;
   display: block;
+  width: var(--search-width);
+  text-align: center;
 }
 
 #search-input {
@@ -185,7 +191,12 @@ body {
 }
 
 .settings-button.danger:hover {
-  background-color: var(--ctp-mocha-red); /* A distinct danger color */
+  background-color: var(--ctp-latte-red);
+  color: var(--ctp-latte-base);
+}
+
+.dark-mode .settings-button.danger:hover {
+  background-color: var(--ctp-mocha-red);
   color: var(--ctp-mocha-base);
 }
 
@@ -220,9 +231,57 @@ body {
   color: var(--text-color);
 }
 
+.appearance-setting select {
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  border: 1px solid var(--overlay-color);
+  border-radius: 5px;
+  padding: 8px;
+}
 .appearance-setting input[type="range"] {
   width: 100%;
   cursor: pointer;
+}
+
+.appearance-setting input[type="range"] {
+  -webkit-appearance: none; /* Hides the default slider look in WebKit browsers */
+  appearance: none;
+  width: 100%;
+  height: 8px; /* Height of the track */
+  background: var(--surface-color); /* Track color */
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  border: 1px solid var(--overlay-color);
+}
+
+/* --- Slider Thumb Styles --- */
+.appearance-setting input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px; /* Thumb width */
+  height: 20px; /* Thumb height */
+  background: var(--accent-color); /* Thumb color */
+  border-radius: 50%;
+  border: 2px solid var(--surface-color);
+  cursor: pointer;
+  margin-top: -7px; /* Centers the thumb on the track */
+  transition: transform 0.2s ease;
+}
+
+.appearance-setting input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  border: 2px solid var(--surface-color);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.appearance-setting input[type="range"]:hover::-webkit-slider-thumb,
+.appearance-setting input[type="range"]:hover::-moz-range-thumb {
+  transform: scale(1.1);
 }
 
 .appearance-input {

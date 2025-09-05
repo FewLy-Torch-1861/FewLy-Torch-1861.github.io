@@ -8,7 +8,7 @@ function updateClock() {
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const seconds = String(now.getSeconds()).padStart(2, "0");
-    const format = config.styles.clockFormat || "it's {HH}:{mm}:{ss} now!";
+    const format = ConfigManager.get().styles.clockFormat || "it's {HH}:{mm}:{ss} now!";
     const formattedTime = format
       .replace("{HH}", hours)
       .replace("{mm}", minutes)
@@ -24,11 +24,11 @@ const body = document.body;
 function applyTheme(theme) {
   function setTheme(theme) {
     if (theme === "dark-mode") {
-      body.classList.add("dark-mode");
+      document.documentElement.classList.add("dark-mode");
       themeToggleButton.textContent = "☀️"; // Sun emoji for dark mode
       localStorage.setItem("theme", "dark-mode");
     } else {
-      body.classList.remove("dark-mode");
+      document.documentElement.classList.remove("dark-mode");
       themeToggleButton.textContent = "🌙"; // Moon emoji for light mode
       localStorage.setItem("theme", "light-mode");
     }
@@ -43,74 +43,30 @@ function applyTheme(theme) {
 
 function initializeTheme() {
   const storedTheme = localStorage.getItem("theme");
-  if (storedTheme) {
-    applyTheme(storedTheme);
+  const currentTheme =
+    storedTheme ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark-mode"
+      : "light-mode");
+
+  // Set the button icon based on the initially loaded theme
+  if (currentTheme === "dark-mode") {
+    themeToggleButton.textContent = "☀️";
   } else {
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    applyTheme(prefersDark ? "dark-mode" : "light-mode");
+    themeToggleButton.textContent = "🌙";
   }
 
   themeToggleButton.addEventListener("click", () => {
-    if (body.classList.contains("dark-mode")) {
-      applyTheme("light-mode");
-    } else {
-      applyTheme("dark-mode");
-    }
+    const newTheme = document.documentElement.classList.contains("dark-mode") ? "light-mode" : "dark-mode";
+    applyTheme(newTheme);
   });
 }
 
 // --- Settings ---
-const defaultConfig = {
-  searchEngines: {
-    "!yt": "https://www.youtube.com/results?search_query=",
-    "!so": "https://stackoverflow.com/search?q=",
-    "!aw": "https://wiki.archlinux.org/index.php?search=",
-    "!ddg": "https://duckduckgo.com/?q=",
-    "!wiki": "https://en.wikipedia.org/w/index.php?search=",
-    "!g": "https://www.google.com/search?q=",
-    "!gh": "https://github.com/search?q=",
-    "!tw": "https://twitter.com/search?q=",
-    "!": "https://",
-  },
-  defaultSearchEngine: "https://www.google.com/search?q=",
-  colors: {
-    accent: null,
-    clock: null,
-  },
-  styles: {
-    clockFontSize: "2.5", // rem
-    searchFontSize: "1", // rem
-    searchWidth: "50", // vw
-    clockFormat: "it's {HH}:{mm}:{ss} now!",
-  },
-};
-
-let config = JSON.parse(JSON.stringify(defaultConfig)); // Start with a deep copy of defaults
-
-function loadConfig() {
-  const storedConfig = localStorage.getItem("config");
-  if (storedConfig) {
-    const loadedConfig = JSON.parse(storedConfig);
-    // Deep merge for nested objects to preserve defaults for new keys
-    config = {
-      ...config,
-      ...loadedConfig, // User's settings override defaults
-      colors: { ...config.colors, ...(loadedConfig.colors || {}) }, // Merge colors
-      styles: { ...config.styles, ...(loadedConfig.styles || {}) }, // Merge styles
-    };
-  }
-  // Ensure nested objects exist
-  config.searchEngines = config.searchEngines || {};
-}
-
-function saveConfig() {
-  localStorage.setItem("config", JSON.stringify(config));
-}
 
 function applyCustomColors() {
-  const themePrefix = body.classList.contains("dark-mode") ? "mocha" : "latte";
+  const themePrefix = document.documentElement.classList.contains("dark-mode") ? "mocha" : "latte";
+  const config = ConfigManager.get();
 
   if (config.colors.accent) {
     const accentColorVar = `var(--ctp-${themePrefix}-${config.colors.accent})`;
@@ -126,6 +82,7 @@ function applyCustomColors() {
 }
 
 function applyCustomStyles() {
+  const config = ConfigManager.get();
   if (config.styles.clockFontSize) {
     document.documentElement.style.setProperty(
       "--clock-font-size",
@@ -144,6 +101,79 @@ function applyCustomStyles() {
       `${config.styles.searchWidth}vw`
     );
   }
+  applyCustomPositions();
+}
+
+function applyCustomPositions() {
+  const clockEl = document.getElementById("clock");
+  const searchEl = document.getElementById("search-form");
+  const clockPos = ConfigManager.get().positions.clock;
+  const searchPos = ConfigManager.get().positions.search;
+
+  // If both are set to be in the exact same spot (center/center), stack them.
+  if (
+    clockPos.v === "center" &&
+    clockPos.h === "center" &&
+    searchPos.v === "center" &&
+    searchPos.h === "center"
+  ) {
+    // Create a temporary container to center them together
+    let centerContainer = document.getElementById("center-container");
+    if (!centerContainer) {
+      centerContainer = document.createElement("div");
+      centerContainer.id = "center-container";
+      document.body.insertBefore(centerContainer, clockEl);
+      centerContainer.appendChild(clockEl);
+      centerContainer.appendChild(searchEl);
+    }
+    // Reset individual positioning styles
+    [clockEl, searchEl].forEach((el) => {
+      el.style.position = "relative";
+      el.style.top = "auto";
+      el.style.left = "auto";
+      el.style.bottom = "auto";
+      el.style.right = "auto";
+      el.style.transform = "none";
+    });
+    return; // Stop here for this special case
+  }
+
+  const setPosition = (element, pos) => {
+    if (!element || !pos) return;
+
+    // Ensure element is a direct child of body for absolute positioning
+    if (element.parentElement.id === "center-container") {
+      document.body.insertBefore(element, element.parentElement);
+    }
+
+    element.style.position = "absolute";
+    element.style.top = "auto";
+    element.style.bottom = "auto";
+    element.style.left = "auto";
+    element.style.right = "auto";
+    let transform = [];
+    const paddingV = `${ConfigManager.get().styles.edgePaddingV}%`;
+    const paddingH = `${ConfigManager.get().styles.edgePaddingH}%`;
+
+    if (pos.v === "top") element.style.top = paddingV;
+    else if (pos.v === "bottom") element.style.bottom = paddingV;
+    else {
+      element.style.top = "50%";
+      transform.push("translateY(-50%)");
+    }
+
+    if (pos.h === "left") element.style.left = paddingH;
+    else if (pos.h === "right") element.style.right = paddingH;
+    else {
+      element.style.left = "50%";
+      transform.push("translateX(-50%)");
+    }
+
+    element.style.transform = transform.join(" ");
+  };
+
+  setPosition(clockEl, clockPos);
+  setPosition(searchEl, searchPos);
 }
 
 // --- Search ---
@@ -158,6 +188,7 @@ function handleSearch(event) {
   const parts = rawQuery.split(" ");
   const prefix = parts[0];
 
+  const config = ConfigManager.get();
   let searchUrl = config.defaultSearchEngine;
   let query = rawQuery;
 
@@ -189,6 +220,7 @@ const engineListDiv = document.getElementById("search-engine-list");
 
 function populateSearchEngineSettings() {
   engineListDiv.innerHTML = "";
+  const config = ConfigManager.get();
   for (const prefix in config.searchEngines) {
     addSearchEngineInput(prefix, config.searchEngines[prefix]);
   }
@@ -222,8 +254,8 @@ function saveSearchEngineSettings() {
       newEngines[prefix] = url;
     }
   });
-  config.searchEngines = newEngines;
-  saveConfig();
+  ConfigManager.get().searchEngines = newEngines;
+  ConfigManager.save();
 }
 
 function setupSettingsModal() {
@@ -257,7 +289,7 @@ function setupSettingsModal() {
           "Are you sure you want to reset all settings to default? This cannot be undone."
         )
       ) {
-        localStorage.removeItem("config");
+        ConfigManager.reset();
         window.location.reload();
       }
     });
@@ -298,7 +330,7 @@ function setupColorSettings() {
     catppuccinColors.forEach((color) => {
       const swatch = document.createElement("span");
       swatch.className = "color-swatch";
-      const colorVar = body.classList.contains("dark-mode")
+      const colorVar = document.documentElement.classList.contains("dark-mode")
         ? `var(--ctp-mocha-${color})`
         : `var(--ctp-latte-${color})`;
       swatch.style.backgroundColor = colorVar;
@@ -307,8 +339,8 @@ function setupColorSettings() {
       swatch.addEventListener("click", (event) => {
         const clickedSwatch = event.currentTarget;
         // Store the color name (e.g., 'red') instead of the full CSS variable
-        config.colors[property] = clickedSwatch.dataset.colorName;
-        saveConfig();
+        ConfigManager.get().colors[property] = clickedSwatch.dataset.colorName;
+        ConfigManager.save();
         applyCustomColors();
       });
       swatches.appendChild(swatch);
@@ -339,16 +371,16 @@ function setupAppearanceSettings() {
     const input = document.createElement("input");
     input.type = "text";
     input.className = "appearance-input";
-    input.value = config.styles[property];
+    input.value = ConfigManager.get().styles[property];
     input.placeholder = placeholder;
 
     input.addEventListener("input", (event) => {
-      config.styles[property] = event.target.value;
+      ConfigManager.get().styles[property] = event.target.value;
       updateClock(); // Update clock live as user types
     });
 
     input.addEventListener("change", () => {
-      saveConfig();
+      ConfigManager.save();
     });
 
     settingDiv.appendChild(labelEl);
@@ -370,7 +402,7 @@ function setupAppearanceSettings() {
     slider.min = min;
     slider.max = max;
     slider.step = step;
-    slider.value = config.styles[property];
+    slider.value = ConfigManager.get().styles[property];
 
     const updateValue = (value) => {
       valueSpan.textContent = `${value}${unit}`;
@@ -378,13 +410,13 @@ function setupAppearanceSettings() {
 
     slider.addEventListener("input", (event) => {
       const newValue = event.target.value;
-      config.styles[property] = newValue;
+      ConfigManager.get().styles[property] = newValue;
       updateValue(newValue);
       applyCustomStyles(); // Apply live
     });
 
     slider.addEventListener("change", () => {
-      saveConfig(); // Save only when user releases the slider
+      ConfigManager.save(); // Save only when user releases the slider
     });
 
     settingDiv.appendChild(labelEl);
@@ -394,24 +426,65 @@ function setupAppearanceSettings() {
     updateValue(slider.value); // Set initial value text
   };
 
+  const createSelect = (label, element, axis) => {
+    const settingDiv = document.createElement("div");
+    settingDiv.className = "appearance-setting";
+
+    const labelEl = document.createElement("label");
+    labelEl.textContent = label;
+
+    const select = document.createElement("select");
+    const options =
+      axis === "v" ? ["top", "center", "bottom"] : ["left", "center", "right"];
+
+    options.forEach((opt) => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+      select.appendChild(option);
+    });
+
+    select.value =
+      ConfigManager.get().positions[element]?.[axis] || (axis === "v" ? "center" : "center");
+
+    select.addEventListener("change", (event) => {
+      ConfigManager.get().positions[element][axis] = event.target.value;
+      applyCustomPositions();
+      ConfigManager.save();
+    });
+
+    settingDiv.appendChild(labelEl);
+    settingDiv.appendChild(select);
+    container.appendChild(settingDiv);
+  };
+
   createTextInput("Clock Format", "clockFormat", "e.g. {HH}:{mm}");
   createSlider("Clock Font Size", "clockFontSize", 1, 8, 0.1, "rem");
+  createSelect("Clock Vertical Position", "clock", "v");
+  createSelect("Clock Horizontal Position", "clock", "h");
+
   createSlider("Search Font Size", "searchFontSize", 0.5, 2, 0.05, "rem");
   createSlider("Search Bar Width", "searchWidth", 20, 100, 1, "vw");
+  createSelect("Search Vertical Position", "search", "v");
+  createSelect("Search Horizontal Position", "search", "h");
+
+  createSlider("Vertical Edge Padding", "edgePaddingV", 0, 45, 1, "%");
+  createSlider("Horizontal Edge Padding", "edgePaddingH", 0, 45, 1, "%");
 }
 
 // --- Initialization ---
 document.addEventListener("DOMContentLoaded", () => {
-  loadConfig();
+  ConfigManager.load();
   initializeTheme();
   applyCustomColors();
   applyCustomStyles();
   setupSettingsModal();
   setupColorSettings();
-});
 
-// Start the clock after the DOM is loaded and config is ready
-if (document.getElementById("clock")) {
-  updateClock(); // Initial call to display clock immediately
-  setInterval(updateClock, 1000);
-}
+  // Pre-render clock to avoid delay
+  updateClock();
+  // Start the clock after the DOM is loaded and config is ready
+  if (document.getElementById("clock")) {
+    setInterval(updateClock, 1000);
+  }
+});

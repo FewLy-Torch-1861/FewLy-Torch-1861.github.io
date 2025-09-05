@@ -9,21 +9,35 @@
     <style>
       @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Noto+Sans+Thai:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
     </style>
+    <script>
+      // This script runs before the page is rendered to prevent FOUC (Flash of Unstyled Content) for the theme.
+      (function () {
+        try {
+          const storedTheme = localStorage.getItem("theme");
+          const theme =
+            storedTheme ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark-mode"
+              : "light-mode");
+          document.documentElement.classList.toggle("dark-mode", theme === "dark-mode");
+        } catch (e) {
+          console.error("Error applying initial theme:", e);
+        }
+      })();
+    </script>
   </head>
 
   <body>
-    <div id="center-container">
-      <div id="clock"></div>
-      <form id="search-form">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Search..."
-          autofocus
-          autocomplete="off"
-        />
-      </form>
-    </div>
+    <div id="clock"></div>
+    <form id="search-form">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search..."
+        autofocus
+        autocomplete="off"
+      />
+    </form>
 
     <div class="footer">
       <button id="settings-toggle">⚙️</button>
@@ -59,6 +73,7 @@
           <p class="settings-description">
             Use <code>{HH}</code> for hours, <code>{mm}</code> for minutes, and
             <code>{ss}</code> for seconds in the clock format.
+            You can also change the position of the clock and search bar.
           </p>
           <div id="appearance-settings-container"></div>
         </div>
@@ -72,6 +87,7 @@
         </div>
       </div>
     </div>
+    <script src="js/config.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

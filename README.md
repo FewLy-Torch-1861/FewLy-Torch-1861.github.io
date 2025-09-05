@@ -17,7 +17,8 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 - **Deep Customization**:
   - **Search Engines**: Add, remove, or edit search engine prefixes through the settings menu.
   - **Colors**: Customize the accent and clock colors using the Catppuccin palette.
-  - **Appearance**: Adjust the font size of the clock and search bar, and change the width of the search container.
+  - **Appearance**: Customize the clock's format (e.g., show/hide seconds). Adjust font sizes, search bar width, and edge padding.
+  - **Layout**: Freely change the position of the clock and search bar on the page (top, center, bottom, left, right).
 - **Persistent Settings**: All your customizations are automatically saved in your browser's local storage.
 - **Reset to Default**: Easily revert all changes back to the original settings with a single click.
 - **Responsive Design**: Adapts to different screen sizes for a great experience on any device.
@@ -25,7 +26,7 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 ## To-Do
 
 - [x] Clock format customization (e.g., 12h/24h, show/hide seconds)
-- [ ] Customizable positions for the clock and search bar
+- [x] Customizable positions for the clock and search bar
 - [ ] Search suggestions
 - [ ] Bookmarks/quick links section
 - [ ] show/hide credit
