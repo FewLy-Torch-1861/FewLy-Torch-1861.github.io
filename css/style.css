@@ -20,8 +20,6 @@ body.dark-mode {
   --surface-color: var(--ctp-mocha-surface0);
   --overlay-color: var(--ctp-mocha-overlay0);
   --overlay2-color: var(--ctp-mocha-overlay2);
-  --accent-color: var(--ctp-mocha-mauve);
-  --clock-color: var(--ctp-mocha-pink);
 }
 
 body {

@@ -33,6 +33,8 @@ function applyTheme(theme) {
       localStorage.setItem("theme", "light-mode");
     }
     // Re-render color settings to match the new theme
+    // and re-apply custom colors for the new theme.
+    applyCustomColors();
     setupColorSettings();
   }
 
@@ -94,17 +96,18 @@ function saveConfig() {
 }
 
 function applyCustomColors() {
+  const themePrefix = body.classList.contains("dark-mode") ? "mocha" : "latte";
+
   if (config.colors.accent) {
+    const accentColorVar = `var(--ctp-${themePrefix}-${config.colors.accent})`;
     document.documentElement.style.setProperty(
       "--accent-color",
-      config.colors.accent
+      accentColorVar
     );
   }
   if (config.colors.clock) {
-    document.documentElement.style.setProperty(
-      "--clock-color",
-      config.colors.clock
-    );
+    const clockColorVar = `var(--ctp-${themePrefix}-${config.colors.clock})`;
+    document.documentElement.style.setProperty("--clock-color", clockColorVar);
   }
 }
 
@@ -249,10 +252,12 @@ function setupColorSettings() {
         ? `var(--ctp-mocha-${color})`
         : `var(--ctp-latte-${color})`;
       swatch.style.backgroundColor = colorVar;
-      swatch.dataset.colorVar = colorVar;
+      swatch.dataset.colorName = color;
 
-      swatch.addEventListener("click", () => {
-        config.colors[property] = colorVar;
+      swatch.addEventListener("click", (event) => {
+        const clickedSwatch = event.currentTarget;
+        // Store the color name (e.g., 'red') instead of the full CSS variable
+        config.colors[property] = clickedSwatch.dataset.colorName;
         saveConfig();
         applyCustomColors();
       });
@@ -274,5 +279,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeTheme();
   applyCustomColors();
   setupSettingsModal();
-  setupColorSettings(); // This will need to be smarter about themes
+  setupColorSettings();
 });
