@@ -9,6 +9,10 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 
 ## Features
 
+> [! Note]
+> This project currently unoptimized for mobile.
+> I not recommend using it on mobile.
+
 - **Minimalist & Fast**: A clean, uncluttered, and lightweight interface that helps you focus.
 - **Dynamic Clock**: Displays the current time.
 - **Light & Dark Themes**: Toggle between beautiful light (Latte) and dark (Mocha) modes from the [Catppuccin](https://github.com/catppuccin/catppuccin) theme palette.
