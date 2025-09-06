@@ -15,21 +15,24 @@ const ConfigManager = (function () {
     colors: {
       accent: null,
       clock: null,
+      greeting: null,
     },
     styles: {
       clockFontSize: "2.5", // rem
       searchFontSize: "1", // rem
       searchWidth: "50", // vw
       clockFormat: "it's {HH}:{mm}:{ss} now!",
-      edgePaddingV: "5", // %
-      edgePaddingH: "5", // %
+      greetingText: "Hello, Homie!",
+      greetingFontSize: "1.5", // rem
       showCredit: true,
       showSettingsButton: true,
       showThemeButton: true,
+      showGreeting: true,
     },
     positions: {
-      clock: { v: "center", h: "center" },
-      search: { v: "center", h: "center" },
+      clock: { anchor: "center", x: "0vw", y: "-5vh" },
+      search: { anchor: "center", x: "0vw", y: "5vh" },
+      greeting: { anchor: "top-center", x: "0vw", y: "5vh" },
     },
   };
 
@@ -37,11 +40,16 @@ const ConfigManager = (function () {
 
   function deepMerge(target, source) {
     for (const key in source) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        target[key] = target[key] || {};
-        deepMerge(target[key], source[key]);
-      } else {
-        target[key] = source[key];
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+          // Ensure the target has an object to merge into
+          if (!target[key] || typeof target[key] !== 'object') {
+            target[key] = {};
+          }
+          deepMerge(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
       }
     }
     return target;
@@ -53,7 +61,9 @@ const ConfigManager = (function () {
       const storedConfig = localStorage.getItem("config");
       if (storedConfig) {
         const loadedConfig = JSON.parse(storedConfig);
-        config = deepMerge(config, loadedConfig);
+        // Start with a fresh deep copy of defaultConfig and merge the loaded one into it.
+        const newConfig = JSON.parse(JSON.stringify(defaultConfig));
+        config = deepMerge(newConfig, loadedConfig);
       }
     },
     save: () => localStorage.setItem("config", JSON.stringify(config)),

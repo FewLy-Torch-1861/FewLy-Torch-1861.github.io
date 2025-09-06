@@ -17,8 +17,7 @@ function updateClock() {
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const seconds = String(now.getSeconds()).padStart(2, "0");
-    const format =
-      ConfigManager.get().styles.clockFormat || "it's {HH}:{mm}:{ss} now!";
+    const format = ConfigManager.get().styles.clockFormat || "it's {HH}:{mm}:{ss} now!";
     const formattedTime = format
       .replace("{HH}", hours)
       .replace("{mm}", minutes)
@@ -53,10 +52,7 @@ function initializeTheme() {
       : "light-mode");
 
   // Set initial state from localStorage or system preference
-  document.documentElement.classList.toggle(
-    "dark-mode",
-    currentTheme === "dark-mode"
-  );
+  document.documentElement.classList.toggle("dark-mode", currentTheme === "dark-mode");
   themeToggleButton.textContent = currentTheme === "dark-mode" ? "☀️" : "🌙";
 
   themeToggleButton.addEventListener("click", () => {
@@ -70,9 +66,7 @@ function initializeTheme() {
 // --- Settings ---
 
 function applyCustomColors() {
-  const themePrefix = document.documentElement.classList.contains("dark-mode")
-    ? "mocha"
-    : "latte";
+  const themePrefix = document.documentElement.classList.contains("dark-mode") ? "mocha" : "latte";
   const config = ConfigManager.get();
 
   if (config.colors.accent) {
@@ -164,8 +158,7 @@ function applyCustomPositions() {
       element.style.top = pos.y;
     } else if (vertical === "bottom") {
       element.style.bottom = pos.y;
-    } else {
-      // center
+    } else { // center
       element.style.top = `calc(50% + ${pos.y})`;
     }
 
@@ -176,8 +169,7 @@ function applyCustomPositions() {
     } else if (horizontal === "right") {
       element.style.right = pos.x;
       element.style.textAlign = "right";
-    } else {
-      // center
+    } else { // center
       element.style.left = `calc(50% + ${pos.x})`;
     }
 
@@ -298,11 +290,7 @@ function setupSettingsModal() {
 
   settingsToggle.addEventListener("click", toggleSettings);
   settingsClose.addEventListener("click", toggleSettings);
-  settingsModal.addEventListener("click", (event) => {
-    if (event.target === settingsModal) {
-      toggleSettings();
-    }
-  });
+  settingsModal.addEventListener("click", (event) => { if (event.target === settingsModal) { toggleSettings(); } });
 
   addEngineButton.addEventListener("click", () => addSearchEngineInput());
 
@@ -340,16 +328,10 @@ function setupSettingsModal() {
             // Simple validation: check if a known key exists
             if (importedConfig && importedConfig.styles) {
               localStorage.setItem("config", JSON.stringify(importedConfig));
-              alert(
-                "Configuration imported successfully! The page will now reload."
-              );
+              alert("Configuration imported successfully! The page will now reload.");
               window.location.reload();
-            } else {
-              throw new Error("Invalid config file format.");
-            }
-          } catch (error) {
-            alert(`Error importing configuration: ${error.message}`);
-          }
+            } else { throw new Error("Invalid config file format."); }
+          } catch (error) { alert(`Error importing configuration: ${error.message}`); }
         };
         reader.readAsText(file);
       };
@@ -379,9 +361,7 @@ function setupSettingsModal() {
         toggleSettings();
       } else if (event.key === ".") {
         event.preventDefault();
-        const newTheme = document.documentElement.classList.contains(
-          "dark-mode"
-        )
+        const newTheme = document.documentElement.classList.contains("dark-mode")
           ? "light-mode"
           : "dark-mode";
         applyTheme(newTheme);
@@ -494,15 +474,12 @@ function setupAppearanceSettings() {
     input.id = id;
     input.placeholder = placeholder;
 
-    input.addEventListener("input", (event) => {
-      // Live update
+    input.addEventListener("input", (event) => { // Live update
       ConfigManager.get().styles[property] = event.target.value;
-      if (property === "clockFormat") updateClock();
-      else if (property === "greetingText") updateGreeting();
+      if (property === 'clockFormat') updateClock(); else if (property === 'greetingText') updateGreeting();
     });
 
-    input.addEventListener("change", () => {
-      // Save on blur
+    input.addEventListener("change", () => { // Save on blur
       ConfigManager.save();
     });
 
@@ -555,13 +532,13 @@ function setupAppearanceSettings() {
     updateValue(slider.value); // Set initial value text
     return labelEl;
   };
-
+  
   const createCheckbox = (label, property) => {
     const labelEl = document.createElement("label");
     labelEl.className = "appearance-setting";
     const id = `setting-${property}`;
     labelEl.htmlFor = id;
-
+    
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.id = id;
@@ -588,39 +565,21 @@ function setupAppearanceSettings() {
   // --- Create Groups ---
   const greetingGroup = createSettingsGroup(container, "Greeting");
   greetingGroup.appendChild(createCheckbox("Show Greeting", "showGreeting"));
-  greetingGroup.appendChild(
-    createTextInput("Text", "greetingText", "e.g. Hello, Homie!")
-  );
-  greetingGroup.appendChild(
-    createSlider("Font Size", "greetingFontSize", 0.5, 5, 0.1, "rem")
-  );
+  greetingGroup.appendChild(createTextInput("Text", "greetingText", "e.g. Hello, Homie!"));
+  greetingGroup.appendChild(createSlider("Font Size", "greetingFontSize", 0.5, 5, 0.1, "rem"));
 
   const clockGroup = createSettingsGroup(container, "Clock");
-  clockGroup.appendChild(
-    createTextInput("Format", "clockFormat", "e.g. {HH}:{mm}")
-  );
-  clockGroup.appendChild(
-    createSlider("Font Size", "clockFontSize", 1, 8, 0.1, "rem")
-  );
+  clockGroup.appendChild(createTextInput("Format", "clockFormat", "e.g. {HH}:{mm}"));
+  clockGroup.appendChild(createSlider("Font Size", "clockFontSize", 1, 8, 0.1, "rem"));
 
-  const searchGroup = createSettingsGroup(container, "Search Bar");
-  searchGroup.appendChild(
-    createSlider("Font Size", "searchFontSize", 0.5, 2, 0.05, "rem")
-  );
-  searchGroup.appendChild(
-    createSlider("Width", "searchWidth", 20, 95, 1, "vw")
-  );
+  const searchGroup = createSettingsGroup(container, "Search Bar");  
+  searchGroup.appendChild(createSlider("Font Size", "searchFontSize", 0.5, 2, 0.05, "rem"));
+  searchGroup.appendChild(createSlider("Width", "searchWidth", 20, 95, 1, "vw"));
 
   const generalGroup = createSettingsGroup(container, "Footer");
-  generalGroup.appendChild(
-    createCheckbox("Show 'made by me' Credit", "showCredit")
-  );
-  generalGroup.appendChild(
-    createCheckbox("Show Settings Button (Ctrl+,)", "showSettingsButton")
-  );
-  generalGroup.appendChild(
-    createCheckbox("Show Theme Toggle Button (Ctrl+.)", "showThemeButton")
-  );
+  generalGroup.appendChild(createCheckbox("Show 'made by me' Credit", "showCredit"));
+  generalGroup.appendChild(createCheckbox("Show Settings Button (Ctrl+,)", "showSettingsButton"));
+  generalGroup.appendChild(createCheckbox("Show Theme Toggle Button (Ctrl+.)", "showThemeButton"));
 }
 
 function setupLayoutSettings() {
@@ -628,7 +587,7 @@ function setupLayoutSettings() {
   if (!container) return;
 
   container.innerHTML = ""; // Clear existing
-
+  
   const createAnchorControl = (label, element) => {
     const labelEl = document.createElement("label");
     labelEl.className = "appearance-setting";
@@ -636,24 +595,14 @@ function setupLayoutSettings() {
     labelEl.htmlFor = id;
     labelEl.appendChild(document.createTextNode(label));
 
-    const controlContainer = document.createElement("div");
-    controlContainer.style.display = "flex";
-    controlContainer.style.gap = "10px";
-    controlContainer.style.alignItems = "center";
+    const controlContainer = document.createElement('div');
+    controlContainer.style.display = 'flex';
+    controlContainer.style.gap = '10px';
+    controlContainer.style.alignItems = 'center';
 
     // Anchor Select
     const select = document.createElement("select");
-    const options = [
-      "top-left",
-      "top-center",
-      "top-right",
-      "center-left",
-      "center",
-      "center-right",
-      "bottom-left",
-      "bottom-center",
-      "bottom-right",
-    ];
+    const options = ["top-left", "top-center", "top-right", "center-left", "center", "center-right", "bottom-left", "bottom-center", "bottom-right"];
     options.forEach((opt) => {
       const option = document.createElement("option");
       option.value = opt;
@@ -670,22 +619,22 @@ function setupLayoutSettings() {
     controlContainer.appendChild(select);
 
     // X/Y Inputs
-    ["x", "y"].forEach((axis) => {
-      const posInput = document.createElement("input");
-      posInput.type = "text";
-      posInput.className = "appearance-input";
-      posInput.style.width = "80px";
-      posInput.placeholder = `${axis.toUpperCase()} offset (e.g. 5vw)`;
-      posInput.value = ConfigManager.get().positions[element]?.[axis] || "0vw";
+    ['x', 'y'].forEach(axis => {
+        const posInput = document.createElement('input');
+        posInput.type = 'text';
+        posInput.className = 'appearance-input';
+        posInput.style.width = '80px';
+        posInput.placeholder = `${axis.toUpperCase()} offset (e.g. 5vw)`;
+        posInput.value = ConfigManager.get().positions[element]?.[axis] || "0vw";
 
-      posInput.addEventListener("input", (event) => {
-        ConfigManager.get().positions[element][axis] = event.target.value;
-        applyCustomPositions();
-      });
-      posInput.addEventListener("change", () => {
-        ConfigManager.save();
-      });
-      controlContainer.appendChild(posInput);
+        posInput.addEventListener('input', (event) => {
+            ConfigManager.get().positions[element][axis] = event.target.value;
+            applyCustomPositions();
+        });
+        posInput.addEventListener('change', () => {
+            ConfigManager.save();
+        });
+        controlContainer.appendChild(posInput);
     });
 
     labelEl.appendChild(controlContainer);

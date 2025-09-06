@@ -28,8 +28,9 @@
   </head>
 
   <body>
-    <div id="clock"></div>
-    <form id="search-form">
+    <div id="greeting" class="positionable"></div>
+    <div id="clock" class="positionable"></div>
+    <form id="search-form" class="positionable">
       <input
         type="text"
         id="search-input"
@@ -40,8 +41,8 @@
     </form>
 
     <div class="footer">
-      <button id="settings-toggle">⚙️</button>
-      <button id="theme-toggle"></button>
+      <button id="settings-toggle" aria-label="Open Settings">⚙️</button>
+      <button id="theme-toggle" aria-label="Toggle Theme"></button>
       <span id="credit-text">made by me.</span>
     </div>
 
@@ -92,7 +93,7 @@
           </p>
           <button id="export-settings-button" class="settings-button">Export Config</button>
           <button id="import-settings-button" class="settings-button">Import Config</button>
-          <br><br>
+          <br /><br />
           <button id="reset-settings-button" class="settings-button danger">Reset All Settings</button>          
         </div>
       </div>

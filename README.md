@@ -5,7 +5,7 @@ This is a vibe code project so the code might not that good but it work.
 
 ## Live Demo
 
-You can use the live version here: **[https://fewly-torch-1861.github.io/](https://fewly-torch-1861.github.io/)**
+You can use the live version here: **[https://fewly-torch-1861.github.io/Homie/](https://fewly-torch-1861.github.io/Homie/)**
 
 ## Features
 
@@ -32,13 +32,13 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 
 - [ ] Search suggestions
 - [ ] Bookmarks/quick links section
-- [ ] Greeting messages
+- [x] Greeting messages
   - [ ] Random Greeting messsages
 - [ ] Random Clock Formats
 
 ## Usage
 
-To use this as your start page, simply set `https://fewly-torch-1861.github.io/` as your browser's home page or new tab page.
+To use this as your start page, simply set `https://fewly-torch-1861.github.io/Homie` as your browser's home page or new tab page.
 
 ## Customization
 
