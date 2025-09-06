@@ -30,15 +30,12 @@
   <body>
     <div id="greeting" class="positionable"></div>
     <div id="clock" class="positionable"></div>
-    <form id="search-form" class="positionable">
-      <input
-        type="text"
-        id="search-input"
-        placeholder="Search..."
-        autofocus
-        autocomplete="off"
-      />
-    </form>
+    <div id="search-form" class="positionable">
+      <!-- This div will be populated by the Google Custom Search script -->
+      <div class="gcse-searchbox-only" data-resultsUrl="https://www.google.com/search" data-newWindow="true" data-queryParameterName="q"></div>
+    </div>
+
+    <div id="search-focus-backdrop" class="backdrop"></div>
 
     <div class="footer">
       <button id="settings-toggle" aria-label="Open Settings">⚙️</button>
@@ -85,6 +82,7 @@
       </div>
     </div>
     <script src="js/config.js" defer></script>
+    <script async src="https://cse.google.com/cse.js?cx=255640abc5ae647d3"></script>
     <script src="js/main.js" defer></script>
   </body>
 </html>

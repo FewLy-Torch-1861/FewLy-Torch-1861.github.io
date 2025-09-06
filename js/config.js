@@ -6,18 +6,6 @@ const ConfigManager = (function () {
    * (e.g., after an application update that adds new settings).
    */
   const defaultConfig = {
-    searchEngines: {
-      "!yt": "https://www.youtube.com/results?search_query=%s",
-      "!so": "https://stackoverflow.com/search?q=%s",
-      "!aw": "https://wiki.archlinux.org/index.php?search=%s",
-      "!ddg": "https://duckduckgo.com/?q=%s",
-      "!wiki": "https://en.wikipedia.org/w/index.php?search=%s",
-      "!g": "https://www.google.com/search?q=%s",
-      "!gh": "https://github.com/search?q=%s",
-      "!tw": "https://twitter.com/search?q=%s",
-      "!": "https://%s",
-    },
-    defaultSearchEngine: "https://www.google.com/search?q=%s",
     colors: {
       accent: null,
       clock: null,
@@ -39,6 +27,10 @@ const ConfigManager = (function () {
       clock: { anchor: "center", x: "0vw", y: "-5vh" },
       search: { anchor: "center", x: "0vw", y: "5vh" },
       greeting: { anchor: "top-center", x: "0vw", y: "5vh" },
+    },
+    // These settings are no longer used by the new search bar.
+    searchEngines: {
+      // This section is preserved for potential future use or re-integration.
     },
   };
 

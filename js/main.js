@@ -12,7 +12,6 @@ const greetingElement = doc.getElementById("greeting");
 const clockElement = doc.getElementById("clock");
 const searchForm = doc.getElementById("search-form");
 const searchInput = doc.getElementById("search-input");
-
 // Footer & Toggles
 const themeToggleButton = doc.getElementById("theme-toggle");
 const settingsToggle = doc.getElementById("settings-toggle");
@@ -20,7 +19,7 @@ const settingsToggle = doc.getElementById("settings-toggle");
 // Settings Modal Elements
 const settingsModal = doc.getElementById("settings-modal");
 const settingsClose = doc.getElementById("settings-close");
-const addEngineButton = doc.getElementById("add-search-engine");
+const addEngineButton = doc.getElementById("add-search-engine"); // This element is now hidden via CSS
 const engineListDiv = doc.getElementById("search-engine-list");
 const colorSettingsContainer = doc.getElementById("color-settings-container");
 const appearanceSettingsContainer = doc.getElementById("appearance-settings-container");
@@ -208,56 +207,17 @@ function applyCustomPositions() {
 }
 
 //! ----------------------------------------------------------------
-//! --- Search Functionality ---------------------------------------
-//! ----------------------------------------------------------------
-
-function handleSearch(event) {
-  event.preventDefault();
-  const rawQuery = searchInput.value.trim();
-  if (!rawQuery) return;
-
-  const parts = rawQuery.split(" ");
-  const prefix = parts[0];
-
-  const config = ConfigManager.get();
-  let searchUrl = config.defaultSearchEngine;
-  let query = rawQuery;
-
-  if (config.searchEngines[prefix]) {
-    searchUrl = config.searchEngines[prefix];
-    query = parts.slice(1).join(" ");
-  }
-
-  // Special handler for the "!" prefix to navigate to a raw URL. It now uses "https://%s".
-  if (prefix === "!" && searchUrl === "https://%s") {
-    window.location.href = query.startsWith("http")
-      ? query
-      : `https://${query}`;
-    return;
-  }
-
-  // Replace %s with the encoded query, or append if %s is not found (for backward compatibility).
-  if (searchUrl.includes("%s")) {
-    window.location.href = searchUrl.replace("%s", encodeURIComponent(query));
-  } else {
-    window.location.href = `${searchUrl}${encodeURIComponent(query)}`;
-  }
-}
-
-if (searchForm && searchInput) {
-  searchForm.addEventListener("submit", handleSearch);
-}
-
-//! ----------------------------------------------------------------
 //! --- Settings Modal: Search Engines -----------------------------
 //! ----------------------------------------------------------------
 
 function populateSearchEngineSettings() {
   engineListDiv.innerHTML = "";
-  const config = ConfigManager.get();
-  for (const prefix in config.searchEngines) {
-    addSearchEngineInput(prefix, config.searchEngines[prefix]);
-  }
+  // This functionality is disabled as we are using Google's search bar.
+  // The parent container is hidden via CSS.
+  // const config = ConfigManager.get();
+  // for (const prefix in config.searchEngines) {
+  //   addSearchEngineInput(prefix, config.searchEngines[prefix]);
+  // }
 }
 
 function addSearchEngineInput(prefix = "", url = "") {
@@ -274,22 +234,12 @@ function addSearchEngineInput(prefix = "", url = "") {
     .querySelector(".remove-engine-button")
     .addEventListener("click", () => {
       entryDiv.remove();
-      saveSearchEngineSettings();
+      // saveSearchEngineSettings(); // No longer needed
     });
 }
 
 function saveSearchEngineSettings() {
-  const newEngines = {};
-  const entries = engineListDiv.querySelectorAll(".search-engine-entry");
-  entries.forEach((entry) => {
-    const prefix = entry.querySelector(".engine-prefix").value.trim();
-    const url = entry.querySelector(".engine-url").value.trim();
-    if (prefix && url) {
-      newEngines[prefix] = url;
-    }
-  });
-  ConfigManager.get().searchEngines = newEngines;
-  ConfigManager.save();
+  // This functionality is disabled.
 }
 
 //! ----------------------------------------------------------------
@@ -306,7 +256,7 @@ function setupSettingsModal() {
     const modalContent = settingsModal.querySelector(".modal-content");
     if (settingsModal.classList.contains("show")) {
       // --- Actions on Closing ---
-      saveSearchEngineSettings();
+      // saveSearchEngineSettings(); // No longer needed
       settingsModal.classList.remove("show");
       modalContent.style.transform = "scale(0.95)";
     } else {
@@ -330,7 +280,7 @@ function setupSettingsModal() {
     }
   });
 
-  addEngineButton.addEventListener("click", () => addSearchEngineInput());
+  // addEngineButton.addEventListener("click", () => addSearchEngineInput()); // No longer needed
 
   // --- Import/Export/Reset Event Listeners ---
   const exportButton = doc.getElementById("export-settings-button");
@@ -939,4 +889,80 @@ doc.addEventListener("DOMContentLoaded", () => {
 
   // Start the clock interval.
   setInterval(updateClock, 1000);
+
+  // --- Search Bar Focus Animation (via Event Delegation) ---
+  // We listen on the static parent (`searchForm`) and check if the event originated
+  // from the dynamic child (`.gsc-input`). We use the capturing phase (`true`)
+  // to ensure our listener runs before Google's scripts can potentially stop the event.
+  searchForm.addEventListener(
+    "focus",
+    (event) => {
+      if (event.target.matches(".gsc-input")) {
+        console.log("Search bar is focused!");
+        doc.getElementById("search-focus-backdrop").classList.add("show");
+        // When focused, force the position to the center of the viewport.
+        Object.assign(searchForm.style, {
+          top: "25vh",
+          left: "50%",
+          bottom: "auto",
+          right: "auto",
+          transform: "translate(-50%, -50%)",
+        });
+      }
+    },
+    true // Use capturing phase.
+  );
+
+  searchForm.addEventListener(
+    "blur",
+    (event) => {
+      if (event.target.matches(".gsc-input")) {
+        console.log("Search bar lost focus.");
+        doc.getElementById("search-focus-backdrop").classList.remove("show");
+        // On blur, re-apply the user-configured position.
+        applyCustomPositions();
+      }
+    },
+    true // Use capturing phase.
+  );
+
+  // --- Autocomplete Position Fix ---
+  // This observer watches for the suggestion box being added to the DOM and
+  // dynamically aligns it with the search bar's current position.
+  const suggestionObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.addedNodes.length) {
+        const suggestionBox = Array.from(mutation.addedNodes).find(
+          (node) => node.nodeType === 1 && node.classList.contains("gssb_c")
+        );
+
+        if (suggestionBox) {
+          const alignSuggestionBox = () => {
+            const searchRect = searchForm.getBoundingClientRect();
+            // Use the search bar's exact screen coordinates to position the suggestion box.
+            // This works regardless of the search bar's position or transform.
+            suggestionBox.style.top = `${searchRect.bottom}px`;
+            suggestionBox.style.left = `${searchRect.left}px`;
+            suggestionBox.style.width = `${searchRect.width}px`;
+            suggestionBox.style.transform = 'none'; // Ensure no conflicting transforms are present.
+          };
+
+          // Align it immediately.
+          alignSuggestionBox();
+
+          // The Google script might try to reposition the box later. We'll create
+          // another observer to watch for style changes on the suggestion box
+          // and immediately re-apply our correct alignment if it's ever changed.
+          const styleObserver = new MutationObserver(alignSuggestionBox);
+          styleObserver.observe(suggestionBox, {
+            attributes: true,
+            attributeFilter: ['style']
+          });
+        }
+      }
+    }
+  });
+
+  // Start observing the body for when the suggestion box is added.
+  suggestionObserver.observe(document.body, { childList: true });
 });

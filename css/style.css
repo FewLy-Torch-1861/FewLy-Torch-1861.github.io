@@ -64,27 +64,94 @@ body {
 
 #search-form {
   width: var(--search-width);
+  /* Animate the position change when focusing/blurring the search bar */
+  z-index: 2; /* Ensure search bar is above the focus backdrop */
+  transition: top 0.3s ease, left 0.3s ease, bottom 0.3s ease, right 0.3s ease, transform 0.3s ease;
 }
 
-#search-input {
-  box-sizing: border-box;
+/* --- Google Custom Search Bar Styling --- */
+/* This ensures the container div for the search bar fills the available space */
+.gcse-searchbox-only {
   width: 100%;
-  padding: 10px 15px;
-  border: 2px solid var(--overlay-color);
-  border-radius: 25px;
-  background-color: var(--surface-color);
-  color: var(--text-color);
-  font-size: var(--search-font-size);
-  outline: none;
-  transition: border-color 0.3s ease, background-color 0.3s ease,
-    color 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-#search-input:focus {
-  border-color: var(--accent-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+/* Style the table that Google uses to lay out the search input and button */
+.gsc-control-cse,
+.gsc-control-cse-en {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
 }
+
+/* Remove background and border from the input's container cell */
+.gsc-input-box {
+  background: none !important;
+  border: none !important;
+}
+
+/* Style the search input field itself */
+input.gsc-input {
+  box-sizing: border-box !important;
+  background-color: var(--surface-color) !important;
+  border: 2px solid var(--overlay-color) !important;
+  border-radius: 25px !important;
+  color: var(--text-color) !important;
+  font-size: var(--search-font-size) !important;
+  padding: 10px 20px !important; /* Adjusted padding for better text alignment */
+  height: auto !important;
+  font-family: "JetBrains Mono", Rubik, sans-serif !important;
+}
+
+/* Change border to accent color on focus */
+input.gsc-input:focus {
+  border-color: var(--accent-color) !important;
+  outline: none !important; /* Prevent the default browser outline */
+  box-shadow: 0 0 0 2px var(--accent-color); /* Optional: add a subtle glow */
+}
+
+/* Hide the default Google search button and its container cell */
+input.gsc-search-button, .gsc-search-button-v2 { display: none !important; }
+
+/* --- Google Autocomplete Suggestions Styling --- */
+/* The .gssb_c container's position will be handled by JavaScript. */
+
+/* This is the inner container that holds the suggestion items. */
+.gsc-completion-container {
+  /* Add a small margin to create a gap between the search bar and the suggestions. */
+  margin-top: 8px;
+
+  background-color: var(--surface-color) !important;
+  border: 2px solid var(--overlay-color) !important;
+  border-radius: 15px !important;
+  padding: 5px 0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  overflow: hidden; /* Ensures the border-radius is respected by children */
+}
+
+/* Style for each suggestion row */
+.gsc-completion-container .gssb_a {
+  padding: 8px 15px !important;
+  color: var(--text-color) !important;
+  cursor: pointer;
+  font-family: "JetBrains Mono", Rubik, sans-serif !important;
+}
+
+/* Hover/selected state for a suggestion */
+.gsc-completion-container .gssb_j {
+  background-color: var(--overlay-color) !important;
+}
+
+/* Style for the text inside a suggestion */
+.gsc-completion-container .gssb_a span {
+  color: var(--text-color) !important;
+}
+
+/* Style for the bolded (matched) part of the suggestion text */
+.gsc-completion-container .gssb_a b {
+  color: var(--accent-color) !important;
+  font-weight: 600 !important;
+}
+
 
 #settings-toggle,
 #theme-toggle {
@@ -104,7 +171,7 @@ body {
 /* Modal Styles */
 .modal {
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 10; /* Sit on top of everything */
   left: 0;
   top: 0;
   width: 100%;
@@ -118,6 +185,24 @@ body {
   overflow: auto; /* Enable scroll if needed */
   background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
   backdrop-filter: blur(5px);
+}
+
+/* Generic backdrop for focus effect */
+.backdrop {
+  position: fixed;
+  z-index: 1; /* Below the search bar but above other elements */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+}
+.backdrop.show {
+  opacity: 1;
 }
 
 .modal-content {
@@ -163,6 +248,12 @@ body {
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }
+
+/* Hide the now-unused search engine settings section */
+.settings-section:has(#search-engine-list) {
+  display: none;
+}
+
 
 .settings-description {
   font-size: 0.9rem;
