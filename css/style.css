@@ -46,6 +46,8 @@ body {
   position: absolute;
   /* JS handles positioning via top/left/bottom/right and transform. */
   padding: 0.5rem; /* Add some padding to avoid edge collision */
+  /* Animate all changes for a smoother user experience */
+  transition: top 0.3s ease, left 0.3s ease, bottom 0.3s ease, right 0.3s ease, transform 0.3s ease, width 0.3s ease;
 }
 
 #greeting {
@@ -53,6 +55,8 @@ body {
   font-size: var(--greeting-font-size);
   font-weight: 500;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  /* Animate color changes (position is handled by .positionable) */
+  transition: color 0.3s ease;
 }
 
 #clock {
@@ -60,14 +64,16 @@ body {
   font-size: var(--clock-font-size);
   font-weight: bold;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  /* Animate color changes (position is handled by .positionable) */
+  transition: color 0.3s ease;
 }
 
 #search-form {
   width: var(--search-width);
   /* Animate the position change when focusing/blurring the search bar */
   z-index: 2; /* Ensure search bar is above the focus backdrop */
-  transition: top 0.3s ease, left 0.3s ease, bottom 0.3s ease, right 0.3s ease, transform 0.3s ease;
 }
+
 
 /* --- Google Custom Search Bar Styling --- */
 /* This ensures the container div for the search bar fills the available space */
