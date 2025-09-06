@@ -550,14 +550,28 @@ function createComponentSettings(title, controls) {
   layoutSettingsContainer.remove();
 }
 
+const createLabelWithDescription = (label, id, description) => {
+  const container = document.createElement("div");
+  container.className = "setting-label-container";
+
+  const labelEl = document.createElement("label");
+  labelEl.htmlFor = id;
+  labelEl.textContent = label;
+  container.appendChild(labelEl);
+
+  if (description) {
+    const descEl = document.createElement("p");
+    descEl.className = "setting-item-description";
+    descEl.textContent = description;
+    container.appendChild(descEl);
+  }
+  return container;
+};
+
 const createTextInput = (label, property, placeholder, description) => {
   const containerDiv = doc.createElement("div");
   containerDiv.className = "appearance-setting";
   const id = `setting-${property}`;
-
-  const labelEl = doc.createElement("label");
-  labelEl.htmlFor = id;
-  labelEl.textContent = label;
 
   const input = doc.createElement("input");
   input.type = "text";
@@ -589,18 +603,14 @@ const createTextInput = (label, property, placeholder, description) => {
   settingDiv.className = "setting-control";
   settingDiv.appendChild(input);
 
-  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(createLabelWithDescription(label, id, description));
   containerDiv.appendChild(settingDiv);
   return containerDiv;
 };
 
-const createUnitInput = (label, property, units, placeholder) => {
+const createUnitInput = (label, property, units, placeholder, description) => {
   const containerDiv = doc.createElement("div");
   containerDiv.className = "appearance-setting";
-
-  const labelEl = doc.createElement("label");
-  labelEl.textContent = label;
-
   const controlContainer = doc.createElement("div");
   controlContainer.className = "setting-control";
 
@@ -654,19 +664,15 @@ const createUnitInput = (label, property, units, placeholder) => {
   wrapper.appendChild(valueInput);
   wrapper.appendChild(unitSelect);
   controlContainer.appendChild(wrapper);
-  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(createLabelWithDescription(label, null, description));
   containerDiv.appendChild(controlContainer);
   return containerDiv;
 };
 
-const createCheckbox = (label, property) => {
+const createCheckbox = (label, property, description) => {
   const containerDiv = doc.createElement("div");
   containerDiv.className = "appearance-setting";
   const id = `setting-${property}`;
-
-  const labelEl = doc.createElement("label");
-  labelEl.htmlFor = id;
-  labelEl.textContent = label;
 
   const checkbox = doc.createElement("input");
   checkbox.type = "checkbox";
@@ -685,19 +691,15 @@ const createCheckbox = (label, property) => {
   settingDiv.className = "setting-control";
   settingDiv.appendChild(checkbox);
 
-  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(createLabelWithDescription(label, id, description));
   containerDiv.appendChild(settingDiv);
   return containerDiv;
 };
 
-const createAnchorControl = (label, element) => {
+const createAnchorControl = (label, element, description) => {
   const containerDiv = doc.createElement("div");
   containerDiv.className = "appearance-setting";
   const id = `setting-pos-${element}`; // Use the 'element' parameter for a unique ID.
-
-  const labelEl = doc.createElement("label");
-  labelEl.htmlFor = id;
-  labelEl.appendChild(doc.createTextNode(label));
 
   const controlContainer = doc.createElement("div");
   controlContainer.className = "setting-control";
@@ -787,45 +789,93 @@ const createAnchorControl = (label, element) => {
   controlContainer.appendChild(createOffsetControl("x"));
   controlContainer.appendChild(createOffsetControl("y"));
 
-  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(createLabelWithDescription(label, id, description));
   containerDiv.appendChild(controlContainer);
   return containerDiv;
 };
 
 function setupGreetingSettings() {
   createComponentSettings("Greeting", [
-    () => createCheckbox("Show Greeting", "showGreeting"),
-    () => createTextInput("Text", "greetingText", "e.g. Hello, Homie!"),
+    () =>
+      createCheckbox(
+        "Show Greeting",
+        "showGreeting",
+        "Toggles the visibility of the greeting text."
+      ),
+    () =>
+      createTextInput(
+        "Text",
+        "greetingText",
+        "e.g. Hello, Homie!",
+        "Set the text for the greeting message."
+      ),
     () =>
       createUnitInput(
         "Font Size",
         "greetingFontSize",
         ["rem", "em", "px", "pt"],
-        "1.5"
+        "1.5",
+        "Adjust the font size of the greeting."
       ),
-    () => createAnchorControl("Position", "greeting"),
+    () =>
+      createAnchorControl(
+        "Position",
+        "greeting",
+        "Set the anchor point and X/Y offsets."
+      ),
   ]);
 }
 
 function setupClockSettings() {
   createComponentSettings("Clock", [
-    () => createTextInput("Format", "clockFormat", "e.g. {HH}:{mm}:{ss}"),
+    () =>
+      createTextInput(
+        "Format",
+        "clockFormat",
+        "e.g. {HH}:{mm}:{ss}",
+        "Use {HH}, {mm}, {ss} for hours, minutes, seconds."
+      ),
     () =>
       createUnitInput(
         "Font Size",
         "clockFontSize",
         ["rem", "em", "px", "pt"],
-        "2.5"
+        "2.5",
+        "Adjust the font size of the clock."
       ),
-    () => createAnchorControl("Position", "clock"),
+    () =>
+      createAnchorControl(
+        "Position",
+        "clock",
+        "Set the anchor point and X/Y offsets."
+      ),
   ]);
 }
 
 function setupSearchSettings() {
   createComponentSettings("Search Bar", [
-    () => createUnitInput("Font Size", "searchFontSize", ["rem", "em", "px"], "1"),
-    () => createUnitInput("Width", "searchWidth", ["vw", "%", "px"], "50"),
-    () => createAnchorControl("Position", "search"),
+    () =>
+      createUnitInput(
+        "Font Size",
+        "searchFontSize",
+        ["rem", "em", "px"],
+        "1",
+        "Adjust the font size of the search input text."
+      ),
+    () =>
+      createUnitInput(
+        "Width",
+        "searchWidth",
+        ["vw", "%", "px"],
+        "50",
+        "Set the width of the search bar."
+      ),
+    () =>
+      createAnchorControl(
+        "Position",
+        "search",
+        "Set the anchor point and X/Y offsets."
+      ),
   ]);
 
   // The footer settings don't fit neatly into the component-based sections,
@@ -835,13 +885,25 @@ function setupSearchSettings() {
   section.innerHTML = `<h3>General</h3>`;
   const fieldset = createSettingsGroup(section, "Footer Visibility");
   fieldset.appendChild(
-    createCheckbox("Show 'made by me' Credit", "showCredit")
+    createCheckbox(
+      "Show 'made by me' Credit",
+      "showCredit",
+      "Toggles the visibility of the credit text in the footer."
+    )
   );
   fieldset.appendChild(
-    createCheckbox("Show Settings Button (Ctrl+,)", "showSettingsButton")
+    createCheckbox(
+      "Show Settings Button (Ctrl+,)",
+      "showSettingsButton",
+      "Toggles the settings gear icon in the footer."
+    )
   );
   fieldset.appendChild(
-    createCheckbox("Show Theme Toggle Button (Ctrl+.)", "showThemeButton")
+    createCheckbox(
+      "Show Theme Toggle Button (Ctrl+.)",
+      "showThemeButton",
+      "Toggles the theme toggle icon in the footer."
+    )
   );
 
   const dangerZone = settingsModal.querySelector(".settings-section.danger-zone");
