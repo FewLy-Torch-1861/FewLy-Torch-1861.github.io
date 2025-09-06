@@ -30,7 +30,7 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/Homie/]
 
 ## To-Do
 
-- [ ] Search suggestions
+- [x] Search suggestions
 - [ ] Bookmarks/quick links section
 - [x] Greeting messages
   - [ ] Random Greeting messsages
