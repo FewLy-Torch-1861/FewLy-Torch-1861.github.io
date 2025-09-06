@@ -1,24 +1,49 @@
-// --- Greeting ---
+//! ----------------------------------------------------------------
+//! --- Element & State Caching ------------------------------------
+//! ----------------------------------------------------------------
+
+// Cache frequently accessed DOM elements to avoid repeated lookups.
+const doc = document;
+const docEl = doc.documentElement;
+const body = doc.body;
+
+// Main UI Elements
+const greetingElement = doc.getElementById("greeting");
+const clockElement = doc.getElementById("clock");
+const searchForm = doc.getElementById("search-form");
+const searchInput = doc.getElementById("search-input");
+
+// Footer & Toggles
+const themeToggleButton = doc.getElementById("theme-toggle");
+const settingsToggle = doc.getElementById("settings-toggle");
+
+// Settings Modal Elements
+const settingsModal = doc.getElementById("settings-modal");
+const settingsClose = doc.getElementById("settings-close");
+const addEngineButton = doc.getElementById("add-search-engine");
+const engineListDiv = doc.getElementById("search-engine-list");
+const colorSettingsContainer = doc.getElementById("color-settings-container");
+const appearanceSettingsContainer = doc.getElementById("appearance-settings-container");
+const layoutSettingsContainer = doc.getElementById("layout-settings-container");
+
+//! ----------------------------------------------------------------
+//! --- Greeting & Clock -------------------------------------------
+//! ----------------------------------------------------------------
+
 function updateGreeting() {
-  const greetingElement = document.getElementById("greeting");
   if (greetingElement) {
     const config = ConfigManager.get();
     greetingElement.textContent = config.styles.greetingText || "";
   }
 }
 
-// --- Clock ---
-const clockElement = document.getElementById("clock");
-
 function updateClock() {
-  const clockElement = document.getElementById("clock");
   if (clockElement) {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const seconds = String(now.getSeconds()).padStart(2, "0");
-    const format =
-      ConfigManager.get().styles.clockFormat || "it's {HH}:{mm}:{ss} now!";
+    const format = ConfigManager.get().styles.clockFormat;
     const formattedTime = format
       .replace("{HH}", hours)
       .replace("{mm}", minutes)
@@ -27,20 +52,21 @@ function updateClock() {
   }
 }
 
-// --- Theme ---
-const themeToggleButton = document.getElementById("theme-toggle");
-const body = document.body;
+//! ----------------------------------------------------------------
+//! --- Theme Management -------------------------------------------
+//! ----------------------------------------------------------------
 
 function applyTheme(newTheme) {
   const isDarkMode = newTheme === "dark-mode";
-  document.documentElement.classList.toggle("dark-mode", isDarkMode);
+  docEl.classList.toggle("dark-mode", isDarkMode);
   themeToggleButton.textContent = isDarkMode ? "☀️" : "🌙";
   localStorage.setItem("theme", newTheme);
 
-  // Re-render color settings to match the new theme
-  // and re-apply custom colors for the new theme.
+  // Re-apply custom colors to match the new theme's palette.
   applyCustomColors();
-  // If settings are open, refresh the color swatches
+
+  // If the settings modal is open, we need to rebuild the color swatches
+  // because their underlying CSS variables have changed.
   if (settingsModal.classList.contains("show")) setupColorSettings();
 }
 
@@ -52,74 +78,65 @@ function initializeTheme() {
       ? "dark-mode"
       : "light-mode");
 
-  // Set initial state from localStorage or system preference
-  document.documentElement.classList.toggle(
-    "dark-mode",
-    currentTheme === "dark-mode"
-  );
+  // Set initial theme class and button icon on load.
+  docEl.classList.toggle("dark-mode", currentTheme === "dark-mode");
   themeToggleButton.textContent = currentTheme === "dark-mode" ? "☀️" : "🌙";
 
+  // Add click listener to the theme toggle button.
   themeToggleButton.addEventListener("click", () => {
-    const newTheme = document.documentElement.classList.contains("dark-mode")
+    const newTheme = docEl.classList.contains("dark-mode")
       ? "light-mode"
       : "dark-mode";
     applyTheme(newTheme);
   });
 }
 
-// --- Settings ---
+//! ----------------------------------------------------------------
+//! --- Style & Layout Application ---------------------------------
+//! ----------------------------------------------------------------
 
 function applyCustomColors() {
-  const themePrefix = document.documentElement.classList.contains("dark-mode")
+  const themePrefix = docEl.classList.contains("dark-mode")
     ? "mocha"
     : "latte";
   const config = ConfigManager.get();
 
   if (config.colors.accent) {
     const accentColorVar = `var(--ctp-${themePrefix}-${config.colors.accent})`;
-    document.documentElement.style.setProperty(
-      "--accent-color",
-      accentColorVar
-    );
+    docEl.style.setProperty("--accent-color", accentColorVar);
   }
   if (config.colors.clock) {
     const clockColorVar = `var(--ctp-${themePrefix}-${config.colors.clock})`;
-    document.documentElement.style.setProperty("--clock-color", clockColorVar);
+    docEl.style.setProperty("--clock-color", clockColorVar);
   }
   if (config.colors.greeting) {
     const greetingColorVar = `var(--ctp-${themePrefix}-${config.colors.greeting})`;
-    document.documentElement.style.setProperty(
-      "--greeting-color",
-      greetingColorVar
-    );
+    docEl.style.setProperty("--greeting-color", greetingColorVar);
   }
 }
 
 function applyCustomStyles() {
   const config = ConfigManager.get();
   if (config.styles.clockFontSize) {
-    document.documentElement.style.setProperty(
+    docEl.style.setProperty(
       "--clock-font-size",
-      `${config.styles.clockFontSize}rem`
+      config.styles.clockFontSize
     );
   }
   if (config.styles.greetingFontSize) {
-    document.documentElement.style.setProperty(
+    docEl.style.setProperty(
       "--greeting-font-size",
-      `${config.styles.greetingFontSize}rem`
+      config.styles.greetingFontSize
     );
   }
   if (config.styles.searchFontSize) {
-    document.documentElement.style.setProperty(
+    docEl.style.setProperty(
       "--search-font-size",
-      `${config.styles.searchFontSize}rem`
+      config.styles.searchFontSize
     );
   }
   if (config.styles.searchWidth) {
-    document.documentElement.style.setProperty(
-      "--search-width",
-      `${config.styles.searchWidth}vw`
-    );
+    docEl.style.setProperty("--search-width", config.styles.searchWidth);
   }
 
   const setElementVisibility = (id, isVisible) => {
@@ -137,9 +154,6 @@ function applyCustomStyles() {
 }
 
 function applyCustomPositions() {
-  const clockEl = document.getElementById("clock");
-  const searchEl = document.getElementById("search-form");
-  const greetingEl = document.getElementById("greeting");
   const clockPos = ConfigManager.get().positions.clock;
   const searchPos = ConfigManager.get().positions.search;
   const greetingPos = ConfigManager.get().positions.greeting;
@@ -154,7 +168,7 @@ function applyCustomPositions() {
       bottom: "auto",
       right: "auto",
       transform: "translate(0, 0)",
-      textAlign: "center", // Default for positionable elements
+      textAlign: "center", // Default alignment for positionable elements
     });
 
     const [vertical, horizontal] = pos.anchor.split("-");
@@ -182,20 +196,20 @@ function applyCustomPositions() {
     }
 
     // Centering transform
-    const horizontalAnchor = horizontal || vertical; // Handles "center" where horizontal is undefined
+    const horizontalAnchor = horizontal || vertical; // Handles "center" where horizontal is undefined.
     const translateX = horizontalAnchor === "center" ? "-50%" : "0";
     const translateY = vertical === "center" ? "-50%" : "0";
     element.style.transform = `translate(${translateX}, ${translateY})`;
   };
 
-  setPosition(clockEl, clockPos);
-  setPosition(searchEl, searchPos);
-  setPosition(greetingEl, greetingPos);
+  setPosition(clockElement, clockPos);
+  setPosition(searchForm, searchPos);
+  setPosition(greetingElement, greetingPos);
 }
 
-// --- Search ---
-const searchForm = document.getElementById("search-form");
-const searchInput = document.getElementById("search-input");
+//! ----------------------------------------------------------------
+//! --- Search Functionality ---------------------------------------
+//! ----------------------------------------------------------------
 
 function handleSearch(event) {
   event.preventDefault();
@@ -214,6 +228,7 @@ function handleSearch(event) {
     query = parts.slice(1).join(" ");
   }
 
+  // Special handler for the "!" prefix to navigate to a raw URL.
   if (prefix === "!" && searchUrl === "https://") {
     window.location.href = query.startsWith("http")
       ? query
@@ -228,12 +243,9 @@ if (searchForm && searchInput) {
   searchForm.addEventListener("submit", handleSearch);
 }
 
-// --- Settings Modal ---
-const settingsModal = document.getElementById("settings-modal");
-const settingsToggle = document.getElementById("settings-toggle");
-const settingsClose = document.getElementById("settings-close");
-const addEngineButton = document.getElementById("add-search-engine");
-const engineListDiv = document.getElementById("search-engine-list");
+//! ----------------------------------------------------------------
+//! --- Settings Modal: Search Engines -----------------------------
+//! ----------------------------------------------------------------
 
 function populateSearchEngineSettings() {
   engineListDiv.innerHTML = "";
@@ -244,7 +256,7 @@ function populateSearchEngineSettings() {
 }
 
 function addSearchEngineInput(prefix = "", url = "") {
-  const entryDiv = document.createElement("div");
+  const entryDiv = doc.createElement("div");
   entryDiv.className = "search-engine-entry";
   entryDiv.innerHTML = `
     <input type="text" value="${prefix}" placeholder="!prefix" class="engine-prefix">
@@ -275,22 +287,31 @@ function saveSearchEngineSettings() {
   ConfigManager.save();
 }
 
+//! ----------------------------------------------------------------
+//! --- Settings Modal: Main Logic & Events ------------------------
+//! ----------------------------------------------------------------
+
+// State to track if dynamic settings have been built to prevent re-creation.
+let areSettingsInitialized = false;
+
 function setupSettingsModal() {
   if (!settingsModal || !settingsToggle || !settingsClose) return;
 
   const toggleSettings = () => {
     const modalContent = settingsModal.querySelector(".modal-content");
     if (settingsModal.classList.contains("show")) {
-      // Closing
+      // --- Actions on Closing ---
       saveSearchEngineSettings();
       settingsModal.classList.remove("show");
       modalContent.style.transform = "scale(0.95)";
     } else {
-      // Opening
+      // --- Actions on Opening ---
       populateSearchEngineSettings();
       setupColorSettings();
-      setupAppearanceSettings();
-      setupLayoutSettings();
+      // Only build the complex settings UI once for performance.
+      if (!areSettingsInitialized) {
+        buildDynamicSettings();
+      }
       settingsModal.classList.add("show");
       modalContent.style.transform = "scale(1)";
     }
@@ -306,28 +327,28 @@ function setupSettingsModal() {
 
   addEngineButton.addEventListener("click", () => addSearchEngineInput());
 
-  // --- Import/Export ---
-  const exportButton = document.getElementById("export-settings-button");
+  // --- Import/Export/Reset Event Listeners ---
+  const exportButton = doc.getElementById("export-settings-button");
   if (exportButton) {
     exportButton.addEventListener("click", () => {
       const config = ConfigManager.get();
-      const configJson = JSON.stringify(config, null, 2); // Pretty-print JSON
+      const configJson = JSON.stringify(config, null, 2);
       const blob = new Blob([configJson], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = doc.createElement("a");
       a.href = url;
       a.download = "config.json";
-      document.body.appendChild(a);
+      body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      body.removeChild(a);
       URL.revokeObjectURL(url);
     });
   }
 
-  const importButton = document.getElementById("import-settings-button");
+  const importButton = doc.getElementById("import-settings-button");
   if (importButton) {
     importButton.addEventListener("click", () => {
-      const input = document.createElement("input");
+      const input = doc.createElement("input");
       input.type = "file";
       input.accept = ".json,application/json";
       input.onchange = (event) => {
@@ -337,7 +358,7 @@ function setupSettingsModal() {
         reader.onload = (e) => {
           try {
             const importedConfig = JSON.parse(e.target.result);
-            // Simple validation: check if a known key exists
+            // Basic validation: check if a known key exists.
             if (importedConfig && importedConfig.styles) {
               localStorage.setItem("config", JSON.stringify(importedConfig));
               alert(
@@ -357,7 +378,7 @@ function setupSettingsModal() {
     });
   }
 
-  const resetSettingsButton = document.getElementById("reset-settings-button");
+  const resetSettingsButton = doc.getElementById("reset-settings-button");
   if (resetSettingsButton) {
     resetSettingsButton.addEventListener("click", () => {
       if (
@@ -371,17 +392,15 @@ function setupSettingsModal() {
     });
   }
 
-  // Add keybinds
+  // --- Global Keybinds ---
   window.addEventListener("keydown", (event) => {
     if (event.ctrlKey) {
       if (event.key === ",") {
         event.preventDefault();
         toggleSettings();
       } else if (event.key === ".") {
-        event.preventDefault();
-        const newTheme = document.documentElement.classList.contains(
-          "dark-mode"
-        )
+        event.preventDefault(); // Prevent browser's default action.
+        const newTheme = docEl.classList.contains("dark-mode")
           ? "light-mode"
           : "dark-mode";
         applyTheme(newTheme);
@@ -390,13 +409,14 @@ function setupSettingsModal() {
   });
 }
 
+//! ----------------------------------------------------------------
+//! --- Settings Modal: Color Pickers ------------------------------
+//! ----------------------------------------------------------------
+
 function setupColorSettings() {
-  const colorSettingsContainer = document.getElementById(
-    "color-settings-container"
-  );
   if (!colorSettingsContainer) return;
 
-  colorSettingsContainer.innerHTML = ""; // Clear existing swatches
+  colorSettingsContainer.innerHTML = ""; // Always rebuild as colors depend on theme.
 
   const catppuccinColors = [
     "rosewater",
@@ -416,25 +436,26 @@ function setupColorSettings() {
   ];
 
   const createColorPicker = (label, property) => {
-    const pickerDiv = document.createElement("div");
+    const pickerDiv = doc.createElement("div");
     pickerDiv.innerHTML = `<h4>${label}</h4>`;
-    const swatches = document.createElement("div");
+    const swatches = doc.createElement("div");
     swatches.className = "color-swatches";
 
     catppuccinColors.forEach((color) => {
-      const swatch = document.createElement("span");
+      const swatch = doc.createElement("span");
       swatch.className = "color-swatch";
-      const colorVar = document.documentElement.classList.contains("dark-mode")
+      const colorVar = docEl.classList.contains("dark-mode")
         ? `var(--ctp-mocha-${color})`
         : `var(--ctp-latte-${color})`;
       swatch.style.backgroundColor = colorVar;
       swatch.dataset.colorName = color;
 
-      // Highlight the selected color on creation
+      // Highlight the currently selected color.
       if (ConfigManager.get().colors[property] === color) {
         swatch.classList.add("selected");
       }
 
+      // Event listener to handle color selection.
       swatch.addEventListener("click", (event) => {
         const clickedSwatch = event.currentTarget;
         // Remove 'selected' from any previously selected swatch in this group
@@ -445,7 +466,7 @@ function setupColorSettings() {
         }
         // Add 'selected' to the newly clicked swatch
         clickedSwatch.classList.add("selected");
-        // Store the color name (e.g., 'red') instead of the full CSS variable
+        // Store the color name (e.g., 'red'), not the CSS variable.
         ConfigManager.get().colors[property] = clickedSwatch.dataset.colorName;
         ConfigManager.save();
         applyCustomColors();
@@ -465,256 +486,390 @@ function setupColorSettings() {
   colorSettingsContainer.appendChild(createColorPicker("Clock Color", "clock"));
 }
 
+//! ----------------------------------------------------------------
+//! --- Settings Modal: Dynamic UI Builders ------------------------
+//! ----------------------------------------------------------------
+
+/**
+ * Builds the Appearance and Layout settings sections.
+ * This is called only once to improve performance when opening the modal.
+ */
+function buildDynamicSettings() {
+  // The containers are now the direct children for the new sections.
+  if (
+    !appearanceSettingsContainer ||
+    !layoutSettingsContainer ||
+    !settingsModal
+  )
+    return;
+
+  // Create dedicated sections for each major component.
+  setupGreetingSettings();
+  setupClockSettings();
+  setupSearchSettings();
+
+  areSettingsInitialized = true;
+}
+
 function createSettingsGroup(container, title) {
-  const fieldset = document.createElement("fieldset");
+  const fieldset = doc.createElement("fieldset");
   fieldset.className = "settings-group";
-  const legend = document.createElement("legend");
+  const legend = doc.createElement("legend");
   legend.textContent = title;
   fieldset.appendChild(legend);
   container.appendChild(fieldset);
   return fieldset;
 }
 
-function setupAppearanceSettings() {
-  const container = document.getElementById("appearance-settings-container");
-  if (!container) return;
+/**
+ * Creates and populates the settings UI for a given component.
+ * This function is a generalized helper to avoid repeating code.
+ * @param {string} title - The title for the settings section (e.g., "Greeting").
+ * @param {Function[]} controls - An array of functions that each return a setting control element.
+ */
+function createComponentSettings(title, controls) {
+  const section = doc.createElement("div");
+  section.className = "settings-section";
 
-  container.innerHTML = ""; // Clear existing
+  // --- Create and append the new section ---
+  section.innerHTML = `<h3>${title}</h3>`;
+  const fieldset = createSettingsGroup(section, "Settings");
+  controls.forEach((controlFn) => fieldset.appendChild(controlFn()));
 
-  const createTextInput = (label, property, placeholder, description) => {
-    const labelEl = document.createElement("label");
-    labelEl.className = "appearance-setting";
-    const id = `setting-${property}`;
-    labelEl.htmlFor = id;
+  // Find the 'Danger Zone' section to insert our new sections before it.
+  const dangerZone = settingsModal.querySelector(".settings-section.danger-zone");
+  if (dangerZone) {
+    dangerZone.parentElement.insertBefore(section, dangerZone);
+  } else {
+    // Fallback if danger zone isn't found
+    settingsModal.querySelector(".modal-content").appendChild(section);
+  }
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "appearance-input";
-    input.value = ConfigManager.get().styles[property];
-    input.id = id;
-    input.placeholder = placeholder;
+  // Clear the old containers
+  appearanceSettingsContainer.remove();
+  layoutSettingsContainer.remove();
+}
 
-    input.addEventListener("input", (event) => {
-      // Live update
-      ConfigManager.get().styles[property] = event.target.value;
-      if (property === "clockFormat") updateClock();
-      else if (property === "greetingText") updateGreeting();
-    });
+const createTextInput = (label, property, placeholder, description) => {
+  const containerDiv = doc.createElement("div");
+  containerDiv.className = "appearance-setting";
+  const id = `setting-${property}`;
 
-    input.addEventListener("change", () => {
-      // Save on blur
-      ConfigManager.save();
-    });
+  const labelEl = doc.createElement("label");
+  labelEl.htmlFor = id;
+  labelEl.textContent = label;
 
-    labelEl.appendChild(document.createTextNode(label));
-    const settingDiv = document.createElement("div");
-    settingDiv.className = "setting-control";
-    settingDiv.appendChild(input);
-    labelEl.appendChild(settingDiv);
-    return labelEl;
+  const input = doc.createElement("input");
+  input.type = "text";
+  input.className = "appearance-input";
+  input.value = ConfigManager.get().styles[property];
+  input.id = id;
+  input.placeholder = placeholder;
+
+  // Live update for instant feedback.
+  input.addEventListener("input", (event) => {
+    const value = event.target.value;
+    ConfigManager.get().styles[property] = value;
+    if (property === "clockFormat") {
+      updateClock();
+    } else if (property === "greetingText") {
+      updateGreeting();
+    } else if (
+      ["greetingFontSize", "clockFontSize", "searchFontSize", "searchWidth"].includes(
+        property
+      )
+    ) {
+      applyCustomStyles();
+    }
+  });
+
+  input.addEventListener("change", () => ConfigManager.save()); // Save on blur.
+
+  const settingDiv = doc.createElement("div");
+  settingDiv.className = "setting-control";
+  settingDiv.appendChild(input);
+
+  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(settingDiv);
+  return containerDiv;
+};
+
+const createUnitInput = (label, property, units, placeholder) => {
+  const containerDiv = doc.createElement("div");
+  containerDiv.className = "appearance-setting";
+
+  const labelEl = doc.createElement("label");
+  labelEl.textContent = label;
+
+  const controlContainer = doc.createElement("div");
+  controlContainer.className = "setting-control";
+
+  const currentCombinedValue = ConfigManager.get().styles[property] || `0${units[0]}`;
+  const match = currentCombinedValue.match(/(-?\d*\.?\d+)(\D+)?/);
+  let currentValue = "0";
+  let currentUnit = units[0];
+
+  if (match) {
+    currentValue = match[1] || "0";
+    currentUnit = match[2] || units[0];
+  }
+
+  const wrapper = doc.createElement("div");
+  wrapper.className = "offset-control"; // Re-use the same styling
+
+  const valueInput = doc.createElement("input");
+  valueInput.type = "number";
+  valueInput.className = "appearance-input offset-value";
+  valueInput.value = currentValue;
+  valueInput.placeholder = placeholder || "value";
+
+  const unitSelect = doc.createElement("select");
+  unitSelect.className = "appearance-input offset-unit";
+  units.forEach((unit) => {
+    const option = doc.createElement("option");
+    option.value = unit;
+    option.textContent = unit;
+    if (unit === currentUnit) {
+      option.selected = true;
+    }
+    unitSelect.appendChild(option);
+  });
+
+  const updateStyle = () => {
+    const newValue = valueInput.value || "0";
+    const newUnit = unitSelect.value;
+    ConfigManager.get().styles[property] = `${newValue}${newUnit}`;
+    applyCustomStyles();
   };
 
-  const createSlider = (label, property, min, max, step, unit) => {
-    const labelEl = document.createElement("label");
-    labelEl.className = "appearance-setting";
-    const valueSpan = document.createElement("span");
-    const id = `setting-${property}`;
-    labelEl.htmlFor = id;
+  const saveStyle = () => {
+    updateStyle();
+    ConfigManager.save();
+  };
 
-    const slider = document.createElement("input");
-    slider.type = "range";
-    slider.className = "appearance-slider";
-    slider.id = id;
-    slider.min = min;
-    slider.max = max;
-    slider.step = step;
-    slider.value = ConfigManager.get().styles[property];
+  valueInput.addEventListener("input", updateStyle);
+  valueInput.addEventListener("change", saveStyle);
+  unitSelect.addEventListener("change", saveStyle);
 
-    const updateValue = (value) => {
-      valueSpan.textContent = `${value}${unit}`;
+  wrapper.appendChild(valueInput);
+  wrapper.appendChild(unitSelect);
+  controlContainer.appendChild(wrapper);
+  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(controlContainer);
+  return containerDiv;
+};
+
+const createCheckbox = (label, property) => {
+  const containerDiv = doc.createElement("div");
+  containerDiv.className = "appearance-setting";
+  const id = `setting-${property}`;
+
+  const labelEl = doc.createElement("label");
+  labelEl.htmlFor = id;
+  labelEl.textContent = label;
+
+  const checkbox = doc.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = id;
+  checkbox.className = "appearance-checkbox";
+  checkbox.checked = ConfigManager.get().styles[property];
+
+  // Update and save config when checkbox state changes.
+  checkbox.addEventListener("change", (event) => {
+    ConfigManager.get().styles[property] = event.target.checked;
+    ConfigManager.save();
+    applyCustomStyles();
+  });
+
+  const settingDiv = doc.createElement("div");
+  settingDiv.className = "setting-control";
+  settingDiv.appendChild(checkbox);
+
+  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(settingDiv);
+  return containerDiv;
+};
+
+const createAnchorControl = (label, element) => {
+  const containerDiv = doc.createElement("div");
+  containerDiv.className = "appearance-setting";
+  const id = `setting-pos-${element}`; // Use the 'element' parameter for a unique ID.
+
+  const labelEl = doc.createElement("label");
+  labelEl.htmlFor = id;
+  labelEl.appendChild(doc.createTextNode(label));
+
+  const controlContainer = doc.createElement("div");
+  controlContainer.className = "setting-control";
+
+  const select = doc.createElement("select");
+  const options = [
+    "top-left",
+    "top-center",
+    "top-right",
+    "center-left",
+    "center",
+    "center-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
+  ];
+  options.forEach((opt) => {
+    const option = doc.createElement("option");
+    option.value = opt;
+    option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+    select.appendChild(option);
+  });
+  select.id = id;
+  select.value = ConfigManager.get().positions[element]?.anchor || "center";
+  select.addEventListener("change", (event) => {
+    ConfigManager.get().positions[element].anchor = event.target.value;
+    applyCustomPositions();
+    ConfigManager.save();
+  });
+  controlContainer.appendChild(select);
+
+  // X/Y Offset Inputs
+  const positionUnits = ["px", "vw", "vh", "%", "rem", "em"];
+  const createOffsetControl = (axis) => {
+    const currentOffset = ConfigManager.get().positions[element]?.[axis] || "0px";
+    const match = currentOffset.match(/(-?\d*\.?\d+)(\D+)?/);
+    let currentValue = "0";
+    let currentUnit = "px";
+
+    if (match) {
+      currentValue = match[1] || "0";
+      currentUnit = match[2] || "px";
+    }
+
+    const wrapper = doc.createElement("div");
+    wrapper.className = "offset-control";
+
+    const valueInput = doc.createElement("input");
+    valueInput.type = "number";
+    valueInput.className = "appearance-input offset-value";
+    valueInput.value = currentValue;
+    valueInput.placeholder = axis.toUpperCase();
+
+    const unitSelect = doc.createElement("select");
+    unitSelect.className = "appearance-input offset-unit";
+    positionUnits.forEach((unit) => {
+      const option = doc.createElement("option");
+      option.value = unit;
+      option.textContent = unit;
+      if (unit === currentUnit) {
+        option.selected = true;
+      }
+      unitSelect.appendChild(option);
+    });
+
+    const updatePosition = () => {
+      const newValue = valueInput.value || "0";
+      const newUnit = unitSelect.value;
+      ConfigManager.get().positions[element][axis] = `${newValue}${newUnit}`;
+      applyCustomPositions();
     };
 
-    slider.addEventListener("input", (event) => {
-      const newValue = event.target.value;
-      ConfigManager.get().styles[property] = newValue;
-      updateValue(newValue);
-      applyCustomStyles(); // Apply live
-    });
-
-    slider.addEventListener("change", () => {
-      ConfigManager.save(); // Save only when user releases the slider
-    });
-
-    labelEl.appendChild(document.createTextNode(`${label}: `));
-    labelEl.appendChild(valueSpan);
-    const settingDiv = document.createElement("div");
-    settingDiv.className = "setting-control";
-    settingDiv.appendChild(slider);
-    labelEl.appendChild(settingDiv);
-
-    updateValue(slider.value); // Set initial value text
-    return labelEl;
-  };
-
-  const createCheckbox = (label, property) => {
-    const labelEl = document.createElement("label");
-    labelEl.className = "appearance-setting";
-    const id = `setting-${property}`;
-    labelEl.htmlFor = id;
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = id;
-    checkbox.className = "appearance-checkbox";
-    checkbox.checked = ConfigManager.get().styles[property];
-
-    checkbox.addEventListener("change", (event) => {
-      ConfigManager.get().styles[property] = event.target.checked;
+    const savePosition = () => {
+      updatePosition();
       ConfigManager.save();
-      applyCustomStyles(); // Re-apply styles to show/hide credit
-    });
+    };
 
-    const textSpan = document.createElement("span");
-    textSpan.textContent = label;
-    labelEl.appendChild(textSpan);
+    valueInput.addEventListener("input", updatePosition);
+    valueInput.addEventListener("change", savePosition);
+    unitSelect.addEventListener("change", savePosition);
 
-    const settingDiv = document.createElement("div");
-    settingDiv.className = "setting-control";
-    settingDiv.appendChild(checkbox);
-    labelEl.appendChild(settingDiv);
-    return labelEl;
+    wrapper.appendChild(valueInput);
+    wrapper.appendChild(unitSelect);
+    return wrapper;
   };
 
-  // --- Create Groups ---
-  const greetingGroup = createSettingsGroup(container, "Greeting");
-  greetingGroup.appendChild(createCheckbox("Show Greeting", "showGreeting"));
-  greetingGroup.appendChild(
-    createTextInput("Text", "greetingText", "e.g. Hello, Homie!")
-  );
-  greetingGroup.appendChild(
-    createSlider("Font Size", "greetingFontSize", 0.5, 5, 0.1, "rem")
-  );
+  controlContainer.appendChild(createOffsetControl("x"));
+  controlContainer.appendChild(createOffsetControl("y"));
 
-  const clockGroup = createSettingsGroup(container, "Clock");
-  clockGroup.appendChild(
-    createTextInput("Format", "clockFormat", "e.g. {HH}:{mm}")
-  );
-  clockGroup.appendChild(
-    createSlider("Font Size", "clockFontSize", 1, 8, 0.1, "rem")
-  );
+  containerDiv.appendChild(labelEl);
+  containerDiv.appendChild(controlContainer);
+  return containerDiv;
+};
 
-  const searchGroup = createSettingsGroup(container, "Search Bar");
-  searchGroup.appendChild(
-    createSlider("Font Size", "searchFontSize", 0.5, 2, 0.05, "rem")
-  );
-  searchGroup.appendChild(
-    createSlider("Width", "searchWidth", 20, 95, 1, "vw")
-  );
+function setupGreetingSettings() {
+  createComponentSettings("Greeting", [
+    () => createCheckbox("Show Greeting", "showGreeting"),
+    () => createTextInput("Text", "greetingText", "e.g. Hello, Homie!"),
+    () =>
+      createUnitInput(
+        "Font Size",
+        "greetingFontSize",
+        ["rem", "em", "px", "pt"],
+        "1.5"
+      ),
+    () => createAnchorControl("Position", "greeting"),
+  ]);
+}
 
-  const generalGroup = createSettingsGroup(container, "Footer");
-  generalGroup.appendChild(
+function setupClockSettings() {
+  createComponentSettings("Clock", [
+    () => createTextInput("Format", "clockFormat", "e.g. {HH}:{mm}:{ss}"),
+    () =>
+      createUnitInput(
+        "Font Size",
+        "clockFontSize",
+        ["rem", "em", "px", "pt"],
+        "2.5"
+      ),
+    () => createAnchorControl("Position", "clock"),
+  ]);
+}
+
+function setupSearchSettings() {
+  createComponentSettings("Search Bar", [
+    () => createUnitInput("Font Size", "searchFontSize", ["rem", "em", "px"], "1"),
+    () => createUnitInput("Width", "searchWidth", ["vw", "%", "px"], "50"),
+    () => createAnchorControl("Position", "search"),
+  ]);
+
+  // The footer settings don't fit neatly into the component-based sections,
+  // so we'll create a separate section for them.
+  const section = doc.createElement("div");
+  section.className = "settings-section";
+  section.innerHTML = `<h3>General</h3>`;
+  const fieldset = createSettingsGroup(section, "Footer Visibility");
+  fieldset.appendChild(
     createCheckbox("Show 'made by me' Credit", "showCredit")
   );
-  generalGroup.appendChild(
+  fieldset.appendChild(
     createCheckbox("Show Settings Button (Ctrl+,)", "showSettingsButton")
   );
-  generalGroup.appendChild(
+  fieldset.appendChild(
     createCheckbox("Show Theme Toggle Button (Ctrl+.)", "showThemeButton")
   );
+
+  const dangerZone = settingsModal.querySelector(".settings-section.danger-zone");
+  if (dangerZone) {
+    dangerZone.parentElement.insertBefore(section, dangerZone);
+  } else {
+    settingsModal.querySelector(".modal-content").appendChild(section);
+  }
 }
 
-function setupLayoutSettings() {
-  const container = document.getElementById("layout-settings-container");
-  if (!container) return;
+//! ----------------------------------------------------------------
+//! --- App Initialization -----------------------------------------
+//! ----------------------------------------------------------------
 
-  container.innerHTML = ""; // Clear existing
-
-  const createAnchorControl = (label, element) => {
-    const labelEl = document.createElement("label");
-    labelEl.className = "appearance-setting";
-    const id = `setting-pos-${element}`;
-    labelEl.htmlFor = id;
-    labelEl.appendChild(document.createTextNode(label));
-
-    const controlContainer = document.createElement("div");
-    controlContainer.style.display = "flex";
-    controlContainer.style.gap = "10px";
-    controlContainer.style.alignItems = "center";
-
-    // Anchor Select
-    const select = document.createElement("select");
-    const options = [
-      "top-left",
-      "top-center",
-      "top-right",
-      "center-left",
-      "center",
-      "center-right",
-      "bottom-left",
-      "bottom-center",
-      "bottom-right",
-    ];
-    options.forEach((opt) => {
-      const option = document.createElement("option");
-      option.value = opt;
-      option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
-      select.appendChild(option);
-    });
-    select.id = id;
-    select.value = ConfigManager.get().positions[element]?.anchor || "center";
-    select.addEventListener("change", (event) => {
-      ConfigManager.get().positions[element].anchor = event.target.value;
-      applyCustomPositions();
-      ConfigManager.save();
-    });
-    controlContainer.appendChild(select);
-
-    // X/Y Inputs
-    ["x", "y"].forEach((axis) => {
-      const posInput = document.createElement("input");
-      posInput.type = "text";
-      posInput.className = "appearance-input";
-      posInput.style.width = "80px";
-      posInput.placeholder = `${axis.toUpperCase()} offset (e.g. 5vw)`;
-      posInput.value = ConfigManager.get().positions[element]?.[axis] || "0vw";
-
-      posInput.addEventListener("input", (event) => {
-        ConfigManager.get().positions[element][axis] = event.target.value;
-        applyCustomPositions();
-      });
-      posInput.addEventListener("change", () => {
-        ConfigManager.save();
-      });
-      controlContainer.appendChild(posInput);
-    });
-
-    labelEl.appendChild(controlContainer);
-    return labelEl;
-  };
-
-  const greetingGroup = createSettingsGroup(container, "Greeting");
-  greetingGroup.appendChild(createAnchorControl("Position", "greeting"));
-
-  const clockGroup = createSettingsGroup(container, "Clock");
-  clockGroup.appendChild(createAnchorControl("Position", "clock"));
-
-  const searchGroup = createSettingsGroup(container, "Search Bar");
-  searchGroup.appendChild(createAnchorControl("Position", "search"));
-}
-
-// --- Initialization ---
-document.addEventListener("DOMContentLoaded", () => {
+doc.addEventListener("DOMContentLoaded", () => {
+  // Load config from localStorage first.
   ConfigManager.load();
+
+  // Set up initial state and apply all styles and positions.
   initializeTheme();
   applyCustomColors();
-  applyCustomStyles(); // Includes applyCustomPositions
-  setupSettingsModal(); // Sets up listeners
-
-  // Pre-render clock to avoid delay
+  applyCustomStyles(); // This also calls applyCustomPositions.
   updateGreeting();
-  updateClock();
-  // Start the clock after the DOM is loaded and config is ready
-  if (document.getElementById("clock")) {
-    setInterval(updateClock, 1000);
-  }
+  updateClock(); // Initial call to prevent a 1-second delay.
+
+  // Set up all event listeners for settings, search, etc.
+  setupSettingsModal();
+
+  // Start the clock interval.
+  setInterval(updateClock, 1000);
 });

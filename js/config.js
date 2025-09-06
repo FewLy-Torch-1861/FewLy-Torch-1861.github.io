@@ -1,4 +1,10 @@
 const ConfigManager = (function () {
+  /**
+   * Defines the default configuration for the application.
+   * This object serves as the template for a new user's settings and
+   * as a fallback if a user's stored configuration is missing properties
+   * (e.g., after an application update that adds new settings).
+   */
   const defaultConfig = {
     searchEngines: {
       "!yt": "https://www.youtube.com/results?search_query=",
@@ -36,13 +42,22 @@ const ConfigManager = (function () {
     },
   };
 
-  let config = JSON.parse(JSON.stringify(defaultConfig)); // Deep copy
+  // Initialize the live config with a deep copy of the defaults.
+  let config = JSON.parse(JSON.stringify(defaultConfig));
 
+  /**
+   * Recursively merges properties from a source object into a target object.
+   * This is crucial for updating the user's config with new default values
+   * without overwriting their existing customizations.
+   * @param {object} target - The object to merge into (e.g., the new default config).
+   * @param {object} source - The object with user-saved values (e.g., from localStorage).
+   * @returns {object} The merged target object.
+   */
   function deepMerge(target, source) {
     for (const key in source) {
       if (Object.prototype.hasOwnProperty.call(source, key)) {
         if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-          // Ensure the target has an object to merge into
+          // If the key exists in source and is an object, recurse.
           if (!target[key] || typeof target[key] !== 'object') {
             target[key] = {};
           }
@@ -56,17 +71,29 @@ const ConfigManager = (function () {
   }
 
   return {
+    /**
+     * Returns the current, in-memory configuration object.
+     */
     get: () => config,
+
+    /**
+     * Loads the configuration from localStorage. It merges the stored config
+     * into a fresh copy of the default config to ensure all properties are present.
+     */
     load: () => {
       const storedConfig = localStorage.getItem("config");
       if (storedConfig) {
         const loadedConfig = JSON.parse(storedConfig);
-        // Start with a fresh deep copy of defaultConfig and merge the loaded one into it.
+        // Create a new config based on defaults, then merge the user's saved settings into it.
         const newConfig = JSON.parse(JSON.stringify(defaultConfig));
         config = deepMerge(newConfig, loadedConfig);
       }
     },
+
+    /** Saves the current in-memory config to localStorage. */
     save: () => localStorage.setItem("config", JSON.stringify(config)),
+
+    /** Removes the user's configuration from localStorage, effectively resetting to defaults on next load. */
     reset: () => localStorage.removeItem("config"),
   };
 })();

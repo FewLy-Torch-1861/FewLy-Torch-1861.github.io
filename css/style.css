@@ -44,8 +44,7 @@ body {
 
 .positionable {
   position: absolute;
-  /* width: max-content; Let the container be as wide as its content */
-  /* The transform origin is now implicitly center for translate() */
+  /* JS handles positioning via top/left/bottom/right and transform. */
   padding: 0.5rem; /* Add some padding to avoid edge collision */
 }
 
@@ -261,21 +260,41 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  flex-wrap: wrap;
   gap: 1rem;
 }
 
-.appearance-setting label {
+.appearance-setting > label {
   font-weight: 500;
+  flex-shrink: 0; /* Prevent the label from shrinking if the control is wide */
 }
 
 .setting-control {
   flex-basis: 250px;
+  min-width: 50px; /* Ensure it has some base width */
   flex-grow: 1;
   display: flex;
   justify-content: flex-end; /* Align controls to the right */
+  gap: 0.5rem; /* Add spacing between controls like anchor dropdown and offset inputs */
 }
 
+.setting-control > .offset-control {
+  width: 100%;
+}
+
+.offset-control {
+  display: flex;
+  gap: 0.25rem;
+  flex-basis: 120px; /* Give a consistent base size */
+  flex-grow: 1;
+}
+
+.offset-value {
+  flex-grow: 2; /* Allow number input to take more space */
+}
+
+.offset-unit {
+  flex-grow: 1;
+}
 .appearance-setting select {
   background-color: var(--surface-color);
   color: var(--text-color);
@@ -323,47 +342,6 @@ body {
 .appearance-checkbox:focus {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
-}
-
-.appearance-slider, .appearance-setting input[type="range"] {
-  -webkit-appearance: none; /* Hides the default slider look in WebKit browsers */
-  appearance: none;
-  width: 100%;
-  height: 8px; /* Height of the track */
-  background: var(--surface-color); /* Track color */
-  border-radius: 5px;
-  outline: none;
-  cursor: pointer;
-  border: 1px solid var(--overlay-color);
-}
-
-/* --- Slider Thumb Styles --- */
-.appearance-slider::-webkit-slider-thumb, .appearance-setting input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px; /* Thumb width */
-  height: 20px; /* Thumb height */
-  background: var(--accent-color); /* Thumb color */
-  border-radius: 50%;
-  border: 2px solid var(--surface-color);
-  cursor: pointer;
-  margin-top: -7px; /* Centers the thumb on the track */
-  transition: transform 0.2s ease;
-}
-
-.appearance-slider::-moz-range-thumb, .appearance-setting input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: var(--accent-color);
-  border-radius: 50%;
-  border: 2px solid var(--surface-color);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.appearance-slider:hover::-webkit-slider-thumb,
-.appearance-slider:hover::-moz-range-thumb {
-  transform: scale(1.1);
 }
 
 .appearance-input {
