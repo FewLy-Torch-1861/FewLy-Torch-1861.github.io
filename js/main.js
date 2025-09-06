@@ -228,15 +228,20 @@ function handleSearch(event) {
     query = parts.slice(1).join(" ");
   }
 
-  // Special handler for the "!" prefix to navigate to a raw URL.
-  if (prefix === "!" && searchUrl === "https://") {
+  // Special handler for the "!" prefix to navigate to a raw URL. It now uses "https://%s".
+  if (prefix === "!" && searchUrl === "https://%s") {
     window.location.href = query.startsWith("http")
       ? query
       : `https://${query}`;
     return;
   }
 
-  window.location.href = `${searchUrl}${encodeURIComponent(query)}`;
+  // Replace %s with the encoded query, or append if %s is not found (for backward compatibility).
+  if (searchUrl.includes("%s")) {
+    window.location.href = searchUrl.replace("%s", encodeURIComponent(query));
+  } else {
+    window.location.href = `${searchUrl}${encodeURIComponent(query)}`;
+  }
 }
 
 if (searchForm && searchInput) {

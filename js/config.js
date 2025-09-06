@@ -7,17 +7,17 @@ const ConfigManager = (function () {
    */
   const defaultConfig = {
     searchEngines: {
-      "!yt": "https://www.youtube.com/results?search_query=",
-      "!so": "https://stackoverflow.com/search?q=",
-      "!aw": "https://wiki.archlinux.org/index.php?search=",
-      "!ddg": "https://duckduckgo.com/?q=",
-      "!wiki": "https://en.wikipedia.org/w/index.php?search=",
-      "!g": "https://www.google.com/search?q=",
-      "!gh": "https://github.com/search?q=",
-      "!tw": "https://twitter.com/search?q=",
-      "!": "https://",
+      "!yt": "https://www.youtube.com/results?search_query=%s",
+      "!so": "https://stackoverflow.com/search?q=%s",
+      "!aw": "https://wiki.archlinux.org/index.php?search=%s",
+      "!ddg": "https://duckduckgo.com/?q=%s",
+      "!wiki": "https://en.wikipedia.org/w/index.php?search=%s",
+      "!g": "https://www.google.com/search?q=%s",
+      "!gh": "https://github.com/search?q=%s",
+      "!tw": "https://twitter.com/search?q=%s",
+      "!": "https://%s",
     },
-    defaultSearchEngine: "https://www.google.com/search?q=",
+    defaultSearchEngine: "https://www.google.com/search?q=%s",
     colors: {
       accent: null,
       clock: null,
