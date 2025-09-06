@@ -870,6 +870,43 @@ function setupSearchSettings() {
 }
 
 //! ----------------------------------------------------------------
+//! --- Google CSE Customization -----------------------------------
+//! ----------------------------------------------------------------
+
+/**
+ * Waits for the Google Custom Search input to be rendered and then
+ * applies a custom placeholder and removes the "Powered by Google" watermark.
+ * It also sets up a MutationObserver to prevent Google's script from
+ * re-adding the watermark on focus/blur events.
+ */
+function customizeSearchInput() {
+  const checkInterval = setInterval(() => {
+    const gscInput = doc.querySelector("input.gsc-input");
+    if (gscInput) {
+      clearInterval(checkInterval); // Stop checking once the element is found.
+
+      const applyCustomization = () => {
+        // Only apply changes if they are not already set, to avoid infinite loops.
+        if (gscInput.style.backgroundImage !== "none") {
+          gscInput.style.backgroundImage = "none";
+        }
+        if (gscInput.placeholder !== "Search...") {
+          gscInput.placeholder = "Search...";
+        }
+      };
+
+      // Apply the customization immediately.
+      applyCustomization();
+
+      // Observe the input for any style changes and re-apply our customization.
+      const observer = new MutationObserver(applyCustomization);
+      observer.observe(gscInput, { attributes: true, attributeFilter: ['style'] });
+    }
+  }, 100); // Check every 100ms.
+}
+
+
+//! ----------------------------------------------------------------
 //! --- App Initialization -----------------------------------------
 //! ----------------------------------------------------------------
 
@@ -886,6 +923,7 @@ doc.addEventListener("DOMContentLoaded", () => {
 
   // Set up all event listeners for settings, search, etc.
   setupSettingsModal();
+  customizeSearchInput();
 
   // Start the clock interval.
   setInterval(updateClock, 1000);
