@@ -30,11 +30,11 @@ You can use the live version here: **[https://fewly-torch-1861.github.io/](https
 
 ## To-Do
 
-- [x] Clock format customization (e.g., 12h/24h, show/hide seconds)
-- [x] Customizable positions for the clock and search bar
 - [ ] Search suggestions
 - [ ] Bookmarks/quick links section
-- [x] show/hide credit
+- [ ] Greeting messages
+  - [ ] Random Greeting messsages
+- [ ] Random Clock Formats
 
 ## Usage
 
