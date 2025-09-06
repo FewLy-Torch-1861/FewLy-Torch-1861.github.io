@@ -44,7 +44,7 @@ To use this as your start page, simply set `https://fewly-torch-1861.github.io/`
 
 All customization is handled through the settings modal.
 
-1.  Click the **`⚙️`** icon in the bottom-right corner to open the settings.
+1.  Click the **`⚙️`** icon in the bottom-right corner or press `Ctrl + ,` to open the settings.
 2.  Adjust search engines, colors, and appearance to your liking.
 3.  Your changes are saved automatically.
 
