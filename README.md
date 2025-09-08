@@ -1,7 +1,7 @@
 # Homie
 
 This is the repository for my personal homepage. It's a simple, clean, and fast start page designed for daily use.
-This is a vibe code project so the code might not that good but it work.
+This is a vibe code project so the code might not that good, but it work.
 
 ## Live Demo
 
